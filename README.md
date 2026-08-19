@@ -1,4 +1,4 @@
-# Dermot Cochran Photography
+# Tissadelle Shepherd Photography
 
 Personal photography portfolio, built as a static site with [Eleventy](https://www.11ty.dev/).
 
