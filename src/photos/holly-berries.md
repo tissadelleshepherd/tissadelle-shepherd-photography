@@ -1,0 +1,17 @@
+---
+layout: photo.njk
+title: "Holly Berries"
+category: "Nature"
+location: "Dublin, Ireland"
+year: 2025
+album: "Farmleigh, Dublin"
+image: "holly-berries.jpg"
+alt: "A cluster of five scarlet holly berries on a woody stem, among glossy dark green smooth-edged leaves"
+order: 151
+competitions: [DCC, WNPA]
+subjects: [Winter]
+---
+
+Only female hollies carry berries. The species is dioecious — separate male and
+female trees — so a holly that never fruits is not failing at anything, and a
+hedge full of berries had a male somewhere within reach of the bees.

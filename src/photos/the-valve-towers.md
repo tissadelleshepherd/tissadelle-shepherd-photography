@@ -10,6 +10,8 @@ alt: "Two squat stone valve towers standing in dark, still water in front of a l
 order: 132
 setting: "Built"
 competitions: [DCC, WNPA]
+unlisted: true
+subjects: [Drought, Reflections]
 ---
 
 The two reservoirs were fed deliberately differently. Water off the stony,

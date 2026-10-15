@@ -53,6 +53,12 @@ enigmatic/withholding treatment, what to crop away, the darkroom pass, and the
 frame-withholds/note-supplies pairing. This file holds mechanical conventions,
 which are checkable; that one holds taste, which is not.
 
+**Camera settings that worked in the field live in
+[`FIELD-NOTES.md`](./FIELD-NOTES.md)** — per situation (the first is woodland
+floor macro on a support), with the reasoning, so a day out starts from the
+last day's settings rather than from scratch. Add to an existing entry when a
+day confirms or corrects it, rather than starting a new note.
+
 ## Adding a photo
 
 1. Create `src/photos/<slug>.md`:
@@ -77,6 +83,143 @@ That's all — category/location/year/album archive pages are generated
 automatically from front matter. No template changes needed, even for a
 brand-new category, location, or album.
 
+**`source:` (optional) names the frame on `F:` the page's image was made
+from**, as `<card folder>/<file>`, e.g. `"105FARML/DSC_6831.NEF"` (added
+7 October 2026, Dermot's observation that a renamed JPEG hides its NEF unless
+a lookup exists). The folder is part of the key, not decoration: the two
+D3100s count independently, so one frame number recurs across cards (three
+files on `F:` are numbered 6831). Name the NEF where the image was developed
+from raw and the JPG where the camera's rendering was used, so the line also
+records which source the published file came from. It is not rendered and
+the validator does not require it; pages published before this date carry it
+only as they are backfilled from the thumbnail index.
+
+**`featured:` (optional) reserves a homepage slide.** The slideshow is
+normally the newest photo from each of the 10 most recently added-to albums —
+a recency sampler, not a best-of. A featured photo takes a slot ahead of that
+and leads the rotation, and within its album it represents the album instead
+of the newest photo. `featured: <n>` fixes the slide's position (`1` opens the
+rotation); `featured: true` slides follow the numbered ones, newest first. One
+slide per album still holds (two featured photos in one album: the first in
+that sequence wins), and the cap is still 10, so featuring more than 10 drops
+the ones at the back of the sequence. Unflagged behaviour is unchanged — with
+no `featured:` anywhere, the slideshow is pure recency.
+
+**`award:` (optional) records a competition result** on the photo page, as the first row of the metadata list — one string, the placing then the competition, e.g. `"First place, Digital Novice Mono — Dublin Camera Club Summer Competition 2026"` (added 8 September 2026 for *Cheetah on the Mound*, the first). Name the section exactly as the club does: DCC runs Digital and Print sections separately, so *Digital Novice Mono* is a different section from the Prints one, and *Novice Mono* on its own names neither (Dermot's correction, 9 September 2026). It is a fact, not a taste call, so add it the day the result is announced; the SUBMISSION LOG in `F:\Competition Masters\README.txt` gets the same result line. **A page that carries `award:` shows the exact version that won** (Dermot's rule, 11 September 2026): the same crop, tone and mono/colour as the file entered, downsized to site size. Add the award line and check the site image against the entered file in the same change; if they differ, swap the image to the entered version, or leave the award line off the page and log it in the masters README only. *Cheetah on the Mound* is the worked example: the monochrome that placed replaced the colour frame, and the note says the colour frame stays in the folder. **Two versions that win different competitions each get their own page** (Dermot's rule, same day): if a colour cut and a mono cut, or two crops, are entered separately and each places, that is a clear exception to the no-duplicates rule, because each page has to show the exact version that won. Each page carries its own `award:` and its own image; the notes cross-reference the other. Placing is not the only route to a second page: a colour and a mono from one raw are not duplicates in any case (see *What is not a duplicate* under Source material), so an unplaced second version may still go up on its own merits. **A competition winner is always added to the site and is on the Selected page** (Dermot's rule, same day, "for completeness, despite my disdain for external validation"): a placing is a fact about the work, so the winning version goes up even if it would not otherwise have been chosen for the site, with its award line, which puts it on `/selected/` by that fact. This never puts anything below his standards on the site, because nothing below them is ever entered: **a competition entry must meet Dermot's own taste standards and every other rule here, the people rule and the sensitive-topic rules included** (his words, 11 September 2026: submitting otherwise "would be a serious error"). Venue-fitting shapes the cut; it never lowers the bar on what is cut. So a winner going up for completeness is a photo that would have cleared the site's bars anyway. **At four or more awarded photos, the winners leave `/selected/` for a section of their own** (Dermot's direction, 11 September 2026). Until then the Selected page carries them, as above; the trigger is the count of pages carrying `award:` (one today, *Cheetah on the Mound*), and four is the same threshold a subject needs before it earns a page. When the fourth lands, the same change builds the awards section, stops `selected/index.md` admitting a photo by `award:` alone, and updates this file and the `selected:` paragraph below; an awarded photo that Dermot has also flagged `selected: true` stays on Selected by that flag. **The Selected page keeps its name** (Dermot's ruling, same day, "leave it as selected"): after the split it holds only his own picks, which is exactly what the word describes, so only the intro sentence admitting competition placings comes out; no rename, and the `/selected/` URL stays. The validator warns at the threshold so the count is not missed.
+
+**`panels:` (optional) stacks a panel picture on a phone** (added 11 October
+2026, Dermot's choice after the sizes were worked out). A strip of panels
+shown at a phone's width shrinks each panel to a sliver: *Keeping Pace* went
+to about 117×80 px a panel. With `panels:` set, a screen 600 px wide or less
+shows the same JPEG cut into one slice per panel, stacked top to bottom;
+wider screens, a tablet or a phone turned sideways, keep the strip. No second
+image file is made. The value is the panel count, or the count with the
+gutter between panels and the frame round them in source pixels:
+
+```yaml
+panels:
+  count: 3
+  gutter: 10   # px between panels, default 0
+  border: 10   # px of frame all round, default 0
+```
+
+Measure the gutter and frame from the image; the validator fails a set of
+numbers that does not divide it into equal whole-pixel panels, since a
+mis-measured gutter cuts every slice slightly off its edge and still builds.
+It is a choice per picture, not a default: *Keeping Pace* and *Three Ways to
+Dry* carry it, while *Three Strides* stays a strip, because its panels are
+already upright (stacked they run to about two and a half screens) and the
+stride-by-stride sequence reads best across the strip. Geometry and reasoning: `lib/panels.js`.
+
+**`unlisted:` (optional) keeps a photo's page but takes it out of every
+list** (added 11 September 2026, the day pages stopped being removed or
+renamed). `unlisted: true` is the only value. The page still builds at its
+URL for anyone who has the link, with a `noindex` meta; it is in no gallery,
+archive, subjects page, slideshow, Selected page or sitemap, and it does not
+count toward the subjects floor. The validator fails any other value, and
+fails the flag beside `featured:`, `selected:` or `award:`, each of which
+would be a promise the page could not keep (an awarded photo is always on
+the site by Dermot's rule). Use it where a removal would once have been
+used; the image file stays referenced, so the no-orphan check is unaffected.
+
+**`selected:` (optional) puts a photo in the `/selected/` gallery** — the
+curated tier above the main gallery, added 29 August 2026. `selected: true` is
+the only value; there is no ordering, and the page renders in the same order
+as the main gallery. **Which photos carry it was Dermot's call alone until 22
+September 2026**, when he replaced free choice with a rule: **one champion per
+subject page, on every page carrying six or more photographs.** He asked the
+question that prompted it — what the criterion for being on the page actually
+was — and the honest answer was that there had never been one for staying on:
+the page was a snapshot of twenty-one comparison rounds run on 29 August plus
+four later additions, and twenty-nine photographs had been published since
+without any of them being put against the champion of their kind.
+
+- **The rule.** Each subject page with six or more photographs has one
+  champion, and that champion carries `selected: true`. **This does not mean a
+  subject page displays one flagged photograph** — photographs carry several
+  subjects, so a page shows its own champion plus any champion of another page
+  that happens to carry the same subject, and Trees shows three. The rule
+  selects; it does not mark up the browsing pages. A photograph may
+  champion several pages — *The Column* takes Drought and Reflections,
+  *Lioness with Cubs* takes Lions and Young Animals — and nesting makes no
+  difference, so Gulls and Seabirds each choose from everything on their own
+  page and may land on different frames.
+- **Setting the flag is now mine, with ties escalated.** His instruction:
+  *select the best champion of each subject or kind; ask me if there is a close
+  tie or unsure.* So propose and apply, but put a genuinely close call to him
+  rather than guessing — and always say when a change would take the flag off
+  something he picked himself.
+- **Why six.** One champion on all 41 pages would have taken the page from 28
+  photographs to about 39, a fifth of the site, because there are more subjects
+  than he had ever picked. The threshold drops eleven thin pages — Aircraft,
+  Bees, Blossom, Boats and Ships, Buffalo, Martello Towers, Mixed Herds,
+  Rhinos, Sea, Storms, Winter — leaves thirty qualifying, and lands the page at
+  29, within one of the size it already was. A kind with three frames does not
+  need a champion.
+  *Cape Buffalo* is the one photograph that lost its flag to the threshold
+  rather than to a comparison; he said that if a buffalo ever represents the
+  kind it should be *Cape Buffalo, in Mono*.
+- **What "best" means here is his revealed preference, not a stated rule**, and
+  it is worth naming because it decides most pages: across twenty-one rounds he
+  chose the distinctive over the technically strong conventional one every
+  single time, the behaviour or story frame over the clean portrait, and the
+  quiet-but-odd over the postcard. Applied here that is why Trees went to *The
+  Drowned Forest*, Skylines to *Zebra Below the City* over the tower, Woodland
+  to the *Two and a Half Seconds* blur, and Waterbirds to the *Three Strides*
+  triptych ahead of three frames he had picked himself.
+- **The at-large tier stays his alone** (his ruling the same day). Twenty
+  listed photographs carry no subject at all and so can never be champions;
+  one of them, *Rock Hyrax on the Coffee Machine*, was already on the page and
+  keeps its flag. Adding or removing a flag outside the 29 qualifying pages is
+  still his say-so and nobody else's.
+- **A new publish now has a defined consequence**: it joins its subject pages
+  and can take a championship from the frame holding it. That is the gap this
+  rule closes.
+- **The validator enforces it** (added the same day): a subject page of six or
+  more photographs with nothing on `/selected/` fails the build. This is a
+  gate rather than a warning, unlike the subject floor and ceiling, because a
+  page losing its champion is *silent* — an unlisting, a retag or a pass over
+  the flags can take the last one away and nothing else would say so. The fix
+  is a taste call, so the message names the page and asks for a comparison
+  rather than guessing. Note that a page can also hold several flagged
+  photographs and still be fine, since the others are champions of other pages
+  passing through, so the check is "at least one", not "exactly one".
+- **What distinguishes an at-large pick from a champion is, today, that it
+  carries no subject at all**, which is why no extra field was added when the
+  question came up. That holds only while at-large means exactly that. The day
+  something that *does* carry subjects is flagged without being a champion,
+  `selected: true` stops being self-describing and needs a real marker — a
+  separate field, or a value such as `selected: at-large`. Add it then, not
+  before.
+
+**A photo carrying `award:` is on the page too**
+(Dermot's direction, 9 September 2026) — a competition placing is a fact, and
+`selected/index.md` admits a photo by either field, so an awarded photo needs
+no `selected: true` to appear and adding the award is enough — until the fourth awarded photo, when the winners move to their own section (see the `award:` paragraph above). Context: the site's publication bar is
+deliberately permissive (anything as interesting as the site's floor goes up
+unless too similar), so this page is where the ceiling stays visible. It is
+unrelated to `featured:`, which only reserves a homepage slide.
+
 **Country is derived, not written.** There is no `country:` field. `.eleventy.js`
 takes the last comma-separated segment of `location`, so "Enkewa, Maasai Mara,
 Kenya" and "Maasai Mara, Kenya" both roll up under Kenya, and `/country/` pages
@@ -85,29 +228,210 @@ as a country in its own right. Open water is the one case that can't be parsed �
 add it to `AT_SEA_LOCATIONS` in `.eleventy.js` and it groups under "At sea"
 (currently just "Baltic Sea").
 
+**Location depth varies; spelling does not** (settled 1 September 2026, after
+*Godwits Roosting* briefly sat at "Wexford Wildfowl Reserve, Wexford, Ireland"
+while the Saltee photos sat at "Wexford, Ireland", giving one county two
+`/location/` pages). `location` is *where in the world* — the region a viewer
+would browse by — written as deep as the place needs and ending in the country:
+"Wexford, Ireland" and "Maasai Mara, Kenya" are complete, and "Bohernabreena,
+Dublin, Ireland" or "Greenwich, London, England" add a segment because the
+middle one carries real information. Don't invent a level to make every
+location three segments; the country derivation exists precisely so depth can
+vary. The rule that does bind is that both `location` and `album` are grouping
+keys, so **the same place is always the same string** — "Co. Wexford, Ireland"
+beside "Wexford, Ireland" is two pages for one place. `album` is the other axis,
+*which outing*: "Great Saltee, August 2026", the site or city plus the month —
+no region, country or date grammar, since `location` already carries the
+geography on every photo and the album name is a label and a URL. A specific
+site therefore lives in the album, not the location, unless the site is itself
+the region a viewer would look for.
+
+**Subjects are the one overlapping axis** (built 3 September 2026, after the
+question whether the site needed a topic index for collections such as big
+cats, mushrooms or skies). Every other grouping field is single-valued —
+category is genre, location and album are exclusive by meaning — and none of
+them says what is *in* the frame, which is how a viewer thinks about wildlife:
+Wildlife was 65 photos with nothing between it and a 29-photo album. So:
+
+- `subjects: [Birds of Prey, Silhouettes]` is an **optional list**, and
+  a photo carries as many as apply. A subject with one or two frames (the
+  giraffe, the hyraxes) carries none, and an absent key means exactly that.
+- **A subject is what the picture is about, not what happens to be in it**
+  (Dermot, 1 October 2026, verbatim: *"relevance to the subject is also a
+  criterion not just the quality of the image"*). A frame joins a subject
+  group only when that subject is its point: a storm sky behind a lodge and a
+  baboon troop is a backdrop, so *Tenants* carries no `Storms`, while the two
+  acacia frames, which are pictures of the weather, do. A strong image does
+  not earn a place in a group it is only incidentally part of, and a frame
+  whose real subject has no group yet carries none.
+- **The vocabulary is fixed**, in `scripts/validate-photos.js` beside the
+  categories, and a word outside it fails `npm test`. Free-text subjects were
+  rejected because they drift: "Big Cats", "big cats" and "Cats" is three
+  pages for one subject, the same failure the location spelling rule exists
+  for. The name is *Wild Cats*, not *Big Cats*, because the serval is in it. The
+  field is called `subjects` rather than `keywords` because that is what it
+  holds; "keywords" would suggest free text, which it is not.
+- **A subject earns its page at four photos.** The validator counts and
+  *warns* below that floor rather than failing, because a subject slipping
+  under it is a decision — retire the word, or tag the photos that should
+  carry it — and a gate would just teach the eye to skip the warning. A new
+  subject joins the vocabulary in the same change that first tags a photo with
+  it, and earns its place at two (Dermot, 21 September 2026: *two or three can
+  be a group*, which covers creating a subject and not only comparing against
+  one). The preferred band is four to fifteen; `SUBJECT_CEILING` warns over
+  twenty, where a subject has stopped being a kind to browse.
+- **Nesting is declared once and rolled up, never double-tagged** (21 September
+  2026). `SUBJECT_PARENTS` in `lib/derivations.js` holds the hierarchy — Gulls
+  sits inside Seabirds, Lions inside Wild Cats — and `subjectsWithParents`
+  files a photograph under the wider kind as well, so the Seabirds page shows ten
+  while only two photographs carry the word. **Tag the narrowest kind that fits;
+  the wider one is implied, and tagging both fails the check.** Before this the
+  hierarchy was encoded by tagging both. The two counts differ
+  on purpose: the floor and ceiling read the page count, which is what a visitor
+  browses, and the message names the tagged count beside it. **`Birds` is the exception** (Dermot, 21 September
+  2026): as an umbrella over Waterbirds, Seabirds and Birds of Prey it reached 51
+  photographs, a quarter of the site, so it was split. A photograph that carries a
+  bird *kind* no longer carries `Birds` as well, and `Birds` is now the residual
+  term for the birds no kind covers — doves, a starling, a roller, an ostrich. Note
+  that `Birds in Flight` is a treatment tag rather than a kind, so a photograph
+  carrying only that keeps `Birds`. Because a residual page hides where the
+  rest went, the Birds page carries a *More birds* line linking Birds of Prey,
+  Seabirds, Waterbirds and Birds in Flight (22 September 2026) — declared in
+  `SUBJECT_SEE_ALSO` beside `SUBJECT_PARENTS`, and deliberately not nesting, so
+  it links the kinds without rolling them back up. Flowers got the same line
+  the same day, linking Garden Flowers and Blossom. **Waterbirds got the same
+  treatment on 7 October 2026** (Dermot: *"that split makes sense"*) when it
+  reached 22: *Waders* (the two godwit pages and the stilt) and *Cormorants*
+  (Drying Wings, Three Ways to Dry, The Pinnacle) are sibling kinds, not
+  nested, so Waterbirds falls to 18 and carries a *More waterbirds* line to
+  both; Seabirds links Cormorants too, since the pinnacle birds are on the
+  sea. Three pages each, which is a group by his 21 September ruling. Roses was dropped because
+  the St Anne's Park album *is* the roses page. Treatment tags
+  (Silhouettes, Reflections, Birds in Flight, Feeding) describe the photograph
+  rather than the subject and are the most subjective to tag — one look at the
+  frame each, the same discipline as the competition tags. Seasons (Spring,
+  Autumn, Winter) only mean anything for Ireland and Scandinavia; every Kenya
+  frame is October.
+- **`Blossom` was split out of `Flowers` on 21 September 2026, and it sits inside
+  `Trees`, not inside `Flowers`.** Dermot asked whether Flowers should divide into
+  wild and cultivated. It should not: the site already carries that axis at
+  `/wild-or-cultivated/`, derived from category and the IPF-Nature tag, so the
+  split would have said the same thing twice — and it would not have worked
+  anyway, since the cultivated side held eighteen of the twenty-one and stayed
+  over the ceiling. The division that does describe the photographs is a flowering
+  tree seen whole against a single flower head seen close: *Blossom Tree at
+  Farmleigh*, *Chestnut Blossom Branch*, *Horse Chestnut in Bloom* and *The
+  Rhododendron Arch*, all four of which already carried `Trees` and `Spring`. That
+  takes Flowers to 17 and leaves Trees at 19, because the rollup gives Trees back
+  what it lost. **Note the mechanism**: a child does not shorten its parent's
+  page, so nesting Blossom under Flowers would have fixed nothing — it had to
+  become a sibling under a different parent. `Roses` remains off the table for the
+  reason above.
+- **`Garden Flowers` was added on 21 September 2026, and it sits inside
+  `Flowers`.** Dermot's ruling, after I had argued against it: the site already
+  draws the wild/cultivated line at `/wild-or-cultivated/`, so a subject on the
+  same axis states it twice. His answer is that a facet and a subject are not the
+  same thing — the facet is a way to filter the whole site, the subject is a page
+  you browse — and of the two names he chose **Garden Flowers** over *Cultivated
+  Flowers*, because it names where the photograph was taken rather than what a
+  gardener did before he got there. **Which flowers are garden ones is not judged
+  page by page**: it is read from `wildOrCultivated` in `lib/derivations.js`, so
+  the subject and the facet cannot drift apart. Twelve listed photographs carry
+  it; three stay on `Flowers` directly — *Spear Thistle*, *Hoverfly on Thistle
+  Flower* and *Wild Angelica* — which makes `Flowers` the residual term for wild
+  ones, the same shape `Birds` took after its split. **There is deliberately no
+  `Wild Flowers` subject yet.** Three would clear the floor, but symmetry is not
+  a reason to make a page, and the Birds precedent leaves the residual on the
+  parent. Add it when a fourth wild flower arrives and it is worth browsing. Note
+  that `Blossom` is *not* under `Flowers` and so is not affected: a flowering
+  tree sits under `Trees`.
+- **`Big Five` was retired on 21 September 2026, and the reason is a values one.**
+  Every other subject here is a thing in the frame or a quality of the
+  photograph; Big Five is a hunting-era checklist kept alive by safari
+  marketing, and it describes nothing you can see — a lion portrait and a
+  buffalo in mono share a page only because a brochure says so. The structural
+  tell was that splitting it would have left it holding one leopard. Its 23
+  photographs went to kinds that describe them: Elephants (10, unchanged),
+  Lions (8, new, sitting inside Wild Cats), Rhinos (2, new), Buffalo (2, new),
+  and the single leopard to Wild Cats, which it already carried. Nothing was
+  orphaned and nothing outside the generated index linked to the facet.
+- **`Monochrome` was added on 22 September 2026, and it is a treatment tag
+  that needs no judgement.** Dermot's framing: mono can be treated as a kind of
+  subject or as a kind of treatment. In this vocabulary those are the same
+  mechanism — Silhouettes, Reflections, Birds in Flight and Feeding are all
+  subjects, and what makes them treatments is only that they describe the
+  photograph rather than what is in it. Mono is the best-behaved member of that
+  group, because it is a fact about the file: measuring mean saturation across
+  every image on the site returned eight at exactly zero and nothing between
+  them and the next frame at 0.069, so the set is found rather than decided.
+  The eight are *Cheetah on the Mound*, *Cape Buffalo, in Mono*, *Tusker on the
+  Plain, in Mono*, *Spotted Hyena at the Den, in Mono*, *Dalkey Island, in
+  Mono*, *Vulture Landing, in Mono*, *Great Black-backed Gull with Chick, in
+  Mono* and *Parasol* — note that the last two of those do not say so in the
+  title, so **never build the set from titles**. The name is *Monochrome* and
+  not *Mono*, though every title says Mono, because a browsing facet is read by
+  people who have not seen the titles. It gives *Spotted Hyena at the Den, in
+  Mono* its first subject of any kind. Its champion is *Cheetah on the Mound*,
+  already on `/selected/` by its award, so the page adds a kind to browse and
+  nobody to the selection — which is worth saying because the question that
+  prompted it was whether a Monochrome page would get *Cape Buffalo, in Mono*
+  onto Selected. It does not, and the honest reason is that the cheetah is the
+  better monochrome.
+- **`Coast` means the coast is the picture, not the place it was taken**
+  (Dermot's ruling, 22 September 2026, looking at the page: *not all those
+  images show enough coast*). Land and sea have to be in the same frame and the
+  meeting of the two has to be what the photograph is about. An animal on a
+  rock with sea washed flat behind it is a photograph of the animal; it carries
+  its kind and not `Coast`. Nine frames lost the word on that reading — the
+  gull and gannet portraits from Dalkey Island, Great Saltee and Ireland's Eye,
+  three of which showed no sea at all — taking the page from 19, one under the
+  ceiling, to 10. *Grey Seals Hauled Out* kept it: weed-covered rock above the
+  tide is the intertidal zone, and that meeting is the frame. Nothing was
+  orphaned, because every frame that lost `Coast` is on `Gulls` or `Seabirds`
+  already. **The test is the frame, never the location or the album** — half
+  the site is shot within sight of Dublin Bay, so "taken at the coast" would
+  make the word mean nothing.
+- On the photo page the row is labelled **Subjects**. The wild-or-cultivated
+  facet's row was labelled "Subject" until this change and is now **Wild or
+  cultivated**: it is a scope laid over the subjects, not the subject itself
+  (Flowers holds both a spear thistle and a dahlia), and the rows are grouped
+  so the four that describe the picture — Category, Subjects, Wild or
+  cultivated, Setting — come before the four that describe the outing.
+
 **Wild vs cultivated is derived too.** No field for it either.
 `/wild-or-cultivated/` reads `competitions:` — `IPF-Nature` bans cultivated
 plants and ornamental gardens outright, so the tag *is* the wild marker.
 
 **It is a strict binary — every photo in scope is Wild or Cultivated, never
-both and never in between.** That needs a different signal for animals than for
-plants, because `IPF-Nature` is a *compound* test: wild AND no human element
-AND not cultivated AND not feral.
+both and never in between — and the scope is plants** (Dermot's ruling,
+24 September 2026). `IPF-Nature` is a *compound* test (wild AND no human
+element AND not cultivated AND not feral), and for a plant the only realistic
+way to fail it is cultivation, so within that scope it is an exact marker.
 
-- **Wildlife → always Wild.** Decided by category, not by tag. For animals the
-  tag usually fails on a vehicle track or a building in shot, which says
-  nothing about whether the animal is wild — *Young Lion in Morning Light* is a
-  wild lion lying on a bare earth track. The category is the authored judgement
-  about what the subject is (pure wildlife → Wildlife, hand of man →
-  Documentary), so a Wildlife photo is a wild subject by definition.
-- **Macro and Nature → `IPF-Nature` decides.** For plants the only realistic
-  way to fail that tag is cultivation, so it is an exact marker.
-- **Everything else is out of scope** and gets no Subject row; the question is
-  meaningless for architecture.
+- **Macro and Nature → `IPF-Nature` decides.** A Nature frame with an animal in
+  it (*Hoverfly on Thistle Flower*) is labelled by the plant.
+- **Wildlife and Urban Wildlife are out of scope.** They were filed Wild by
+  category until 24 September 2026, which put the row on every animal page to
+  repeat what the category already said. "Cultivated" is a plant word: the
+  animal question is wild, captive or domestic, and the category rules already
+  answer it (captive or hand of man → Documentary). A zoo animal has no honest
+  bucket here either way, so animals have none.
+- **Everything else is out of scope** and gets no Wild or cultivated row; the
+  question is meaningless for architecture.
 
-So getting a *category* wrong misplaces an animal, and getting a *competitions*
-tag wrong misplaces a plant. Both now show up in two places, which is a
-feature.
+**The facet follows the main subject, not the setting** (Dermot's ruling,
+8 October 2026, on *Brackets at the Root*: *"wild or cultivated applied to
+the main subject"*). The tag rule above is right for every case but one: a
+wild organism that cannot carry `IPF-Nature` for a reason that is not
+cultivation, which in practice is a human element in frame, a gravel path
+beside a wild fungus on a planted tree. There `wild_or_cultivated: Wild`
+(or `Cultivated`) in front matter states the subject's own case and wins;
+the validator accepts only those two values and only on a Nature or Macro
+page. Leave the field off everywhere the tag already says the right thing.
+
+So getting a *competitions* tag wrong on a Nature or Macro photo misplaces a
+plant, and shows up in two places — this page and the Garden Flowers subject,
+which reads the same function.
 
 ## Category rules
 
@@ -142,6 +466,19 @@ Macro, Documentary, Creative.
   from the `IPF-Nature` tag and cannot be set directly.
 - Abstract images, composites, multiple exposures, and other creative
   treatments → **Creative**
+- **Composites say what they are** (Dermot's choice, 29 September 2026, of
+  three options put to him). Creative holds three kinds of picture in one
+  category: *real, creatively seen* (one exposure of a scene that existed,
+  e.g. *Backlit Fountain*); *real time, compressed* (several frames of one
+  event, every position real, e.g. *One Mustang Eight Times*, *One Giraffe
+  Three Times*);
+  and *fictional* (real frames combined into a scene that never appeared,
+  e.g. *Three Suns over the Mara*). The category stays one; the **note** of
+  every composite states how many frames it combines and whether they show
+  one moment or a scene that never happened, in plain words and in the
+  site's usual withholding voice. A composite is not published without that
+  note. A single frame, however strange its colour, is not a composite and
+  needs no such line.
 - Photos *of* other people (photographers in action, visitors with animals)
   are good Documentary material — but group photos that include Dermot were
   taken by someone else and must not go on the site.
@@ -190,11 +527,18 @@ photo against both rulesets when adding it:
 
 - **DCC** (Dublin Camera Club, dublincameraclub.ie full competition rules):
   any subject, must be wholly Dermot's own work; composites allowed if every
-  component is his. Effectively every site photo qualifies. Digital spec:
+  component is his. Effectively every site photo qualifies. **The tag names
+  the open competition**; the club's nature competitions follow the FIAP
+  definitions below, so a baited or captive frame that carries `DCC` is
+  open-only (Dermot, 15 September 2026). Digital spec:
   JPEG sRGB, max 3840×2160 px, max 3 MB.
 - **WNPA** (World Nature Photography Awards): nature subjects only; **no
   captive or restrained animals** (Giraffe Centre shots are out), **no
-  composites** or object addition/removal, no baiting. Spec: JPEG, longest
+  composites** or object addition/removal, no baiting — the rule as published
+  (checked 15 September 2026) bars "live bait, dead bait, food lures, feeding,
+  feeding stations, scent, sound or call playback, captive prey, or any other
+  method of attraction or manipulation … where it alters natural behaviour",
+  which a fish thrown to eagles that come to the boats plainly does. Spec: JPEG, longest
   side 1000–3000 px, max 3 MB, EXIF intact, no name in metadata. Deadline is
   **30 June** (midnight GMT).
   **14 categories**, checked against the published rules 28 July 2026:
@@ -213,7 +557,15 @@ photo against both rulesets when adding it:
   **strictest** ruleset. No human elements at all (vehicles, vehicle tracks,
   buildings, balloons, boats all disqualify), no cultivated plants or
   ornamental gardens, no feral/domestic animals, no composites; dust-spot
-  removal and crops are fine.
+  removal and crops are fine. **Technical fixes are allowed; cloning or
+  healing never is, for any nature or wildlife competition** (Dermot,
+  21 September 2026, on *Cross Bills*, a third marabou removed from the
+  corner). Technical means dust-spot healing, denoising, sharpening,
+  exposure, white balance, crop: things done to the camera's rendering.
+  Cloning or healing scene content, adding or removing anything, is out
+  for IPF-Nature, IPF-Wildlife, DCC nature rounds and WNPA alike. A
+  cloned or healed frame is `[DCC]` (open) at most; say in the PR body
+  what was healed.
   **Two exceptions to "no human elements", straight from the definition in
   force** (FIAP INFO 313/2025, agreed with PSA — checked 14 August 2026 against
   `F:\CLAUDE\FIAP Nature Rules 2025.pdf`): a human element is allowed *"when
@@ -265,6 +617,16 @@ need an explicit `setting:` in front matter. **A photo with neither a default
 nor an override returns null and does not appear** — deliberately, so a missing
 judgement shows as absence rather than a confident wrong answer.
 
+**`Mixed` is the fourth value** (Dermot's direction, 24 August 2026: a new
+category for photos where the environment is mixed or unsure). It is for
+frames whose environment genuinely cannot be filed as one of the other three —
+mixed ground, or a call that resists being made cleanly. The distinction that
+keeps it honest: `setting: Mixed` is a **recorded judgement** ("I looked, and
+it is both / it will not settle"), while an absent `setting:` still means
+"not yet judged" and still keeps the photo off `/natural-or-built/`. So Mixed
+never becomes the lazy default — reaching for it requires the same look at the
+frame the other values do. It is explicit-only: no category or tag derives it.
+
 ## Notes on a photograph
 
 The markdown **body** of a `src/photos/*.md` file renders as a note under the
@@ -282,7 +644,11 @@ the frame width, dead centre-bottom, and almost exactly the tone of the muddy
 water it is sitting in — Dermot could not find it himself. The test is whether
 the subject actually fails to read at page size, not whether it is small; keep
 the orientation to one clause at the end and let the rest of the note do the
-usual job.
+usual job. (The file the page carries now is a different cut, in which the hyena
+sits left of centre at the far edge of the pool and reads easily, so its note
+lost the clause on 11 October 2026. The rule stands, and the measurements here
+describe the frame it was written for. Check the clause against the frame
+whenever a page's image changes.)
 
 Note what this exception is *not* a licence to do: it does not justify cropping.
 The same photo is the case in point — the herd on the skyline and the hyena are
@@ -300,8 +666,14 @@ amount of looking at a clean sky would tell you that.
 
 This is separate from the `competitions:` tags, which handle eligibility.
 Baiting is banned by WNPA and by FIAP, so a baited photo is `[DCC]` at most —
-but the tag is for the rulebooks and the note is for the viewer, and both are
-needed.
+and **`DCC` means the club's open competition only** (Dermot's ruling,
+15 September 2026: *Fish Eagle with a Catch* "would count as Wildlife in
+general but not for IPF or DCC competitions … would still be allowed in DCC
+open but not for DCC nature"). The club's nature competitions run on the
+federation's definitions, so a baited frame is out of them exactly as it is
+out of IPF-Nature and IPF-Wildlife; the `DCC` tag never claimed otherwise,
+and this paragraph now says so. The category stays Wildlife, the tag is for
+the rulebooks and the note is for the viewer, and both are needed.
 
 ## Competition masters
 
@@ -310,8 +682,16 @@ Photos eligible for either competition get a high-res master in
 within DCC's 3840×2160), quality ~92, ≤3 MB, EXIF kept. Downsize to 3000 px
 long edge at submission time for WNPA. `README.txt` there carries the full
 eligibility manifest and rules summaries. Files still at 1600 px are
-placeholders whose originals haven't been located yet. Only the best ≤24
-photos per year are needed.
+placeholders whose originals haven't been located yet.
+
+**The folder is a contender pool, not a final selection** (Dermot's ruling,
+23 August 2026, settling a day of cap-widening: 24 → 30 → 48 → 50 → ~60).
+With no sharp way to choose a top-N in advance, a master means "in the
+running", and **Dermot makes the final pick when a competition is due**.
+Guideline is about **60 masters per year**, if and when suitable images are
+found; there may be more competitions to choose from than the local
+calendar, while 24 remains sufficient for uniqueness in local DCC
+competitions — the headroom serves the wider entries, not DCC.
 
 ## Image conventions
 
@@ -321,15 +701,103 @@ photos per year are needed.
   land well under that at quality 88 — that's fine, don't inflate quality.
 - Photos are heavily HDR/vivid-processed in camera (Nikon) — preserve the
   punchy look; downscaling from full-res source tames sky noise.
-- Use `sharp` (Node). No ImageMagick/Python on this machine.
+- Use `sharp` (Node). No ImageMagick on this machine. Python 3.14 is present;
+  `pip install --target <scratch dir> rawpy numpy pillow` gives a raw (NEF)
+  developer without touching the system install - used when a frame is dark or
+  blown and the JPEG has already lost it (`F:\CLAUDE\Photo Review\_tools\develop-pastel.py`).
 
 ## Verifying and shipping
 
+**In a fresh checkout, run `npm ci` before anything else** (22 September 2026).
+`node_modules/` is gitignored and `package-lock.json` is committed, so a
+machine that has never built this site has no packages at all — which is the
+normal state of a Claude Code cloud session, where the repository is cloned
+fresh into a container and nothing is installed. The unit suite survives that
+— `test/*.test.js` imports nothing outside `node:` — so `npm test` reports 30
+passing tests and then stops dead at its second step, where
+`scripts/validate-photos.js` dies at its `require("gray-matter")` on line 23.
+The `&&` chain means the Eleventy dry run never runs at all; it would fail
+too, there being no Eleventy either. **The trap is the middle step, because it
+reads as a broken script rather than a missing install**: a session adding the
+BOM check planted a mark on a file, saw no failure, and spent a while doubting
+the guard, when the validator had in fact aborted at that require and never
+looked at the file at all. `npm ci` rather than `npm install`, since it
+installs the committed lockfile exactly, which is what CI and the cPanel
+deploy both do.
+
+**Read front matter with `gray-matter`, never with a regex** (22 September
+2026, learned the hard way, twice in one day). Three photo files began with a
+UTF-8 BOM — `african-fish-eagle.md`, `fish-eagle-over-the-drowned-forest.md`
+and `great-white-pelican-on-naivasha.md`. Eleventy and
+`scripts/validate-photos.js` both parsed them correctly, because `gray-matter`
+strips the mark, so nothing here ever showed it. A throwaway
+`split(/^---$/m)` does not strip it: the BOM sits before the opening `---`, so
+the split lands on the *closing* delimiter and hands back the note body as if
+it were front matter, and those three photographs read as having no title and
+no subjects and vanish from whatever is being counted. That is how a
+one-champion-per-subject pass came to miss that Birds of Prey holds eleven
+photographs rather than nine and that Birds in Flight qualifies at all — and,
+the same day, how a tool in `applied-statistics-for-ai-engineers` counted 176
+photos carrying `subjects:` where 179 do. Two lessons, and both hold. The
+repo already depends on `gray-matter`; use it for any script that reads these
+files, including a five-line one. **And the mark itself is now a validator
+failure** — see the `npm test` bullet below — so the three files have been
+re-saved without it and a fourth cannot arrive unnoticed. A defect invisible
+to every reader inside the repository was never going to be found from inside
+it.
+
+- `npm test` runs the unit suite (`node --test test/*.test.js`, added
+  27 August 2026 — it pins `lib/derivations.js`, the derived facets and
+  homepage slideshow selection extracted verbatim from `.eleventy.js` so
+  they are testable without booting Eleventy), then
+  `scripts/validate-photos.js` (added 24 August 2026), then the Eleventy dry
+  run; CI runs `npm test`. The validator fails on what is always wrong: a
+  missing required field, a category or `competitions:` tag outside the real
+  vocabulary (a typo'd `IPF-Nature` silently misfiles a plant on
+  `/wild-or-cultivated/`), a `subjects:` entry outside the fixed vocabulary
+  or repeated, an invalid `setting:`, an `image:` that doesn't
+  exist or is shared by two photos, an image file no photo references, a
+  duplicate `order` (the homepage picks "newest" by order), or a `featured:`
+  that is neither `true` nor a positive integer — or a numeric featured
+  position claimed twice (since 27 August 2026; a quoted `"1"` silently
+  becomes an unranked slide and `0`/`false` silently behave as unflagged, so
+  only the two meaningful shapes are accepted), or a **UTF-8 byte order
+  mark** before the opening `---` (since 22 September 2026). That last one is
+  the only check here written for a reader other than this build: gray-matter
+  strips a BOM, so a marked file renders perfectly and the mark is invisible
+  from inside the repository, while any other reader of the front matter sees
+  none and drops the photo without a word. Three files carried one until a
+  tool in `applied-statistics-for-ai-engineers` counted 176 photos carrying
+  `subjects:` where 179 do — which is how they were found. It only *warns* on a
+  Landscape/Documentary/Creative photo with no `setting:` — that absence
+  is a judgement not yet made, and staying off `/natural-or-built/` is the
+  deliberate behaviour — on more than 10 `featured:` photos, where the
+  documented cap drops the back of the sequence — and on a subject carried by
+  fewer than four photos, the floor under a `/subjects/` page. The category and
+  competition vocabularies live at the top of the script; a new category is
+  added there in the same change that introduces it. The full testing
+  picture — what fails vs warns and why, and how to extend the validator —
+  is written up in `TestingStrategy.md` (added 24 August 2026): mechanics
+  there, editorial rules here, taste in `STYLE.md`.
 - Build locally with `npm run build`; check the new pages exist under `_site/`
   and that every `images/photos/*.jpg` reference resolves.
-- `gh` is not installed — open PRs via the GitHub REST API using the token
-  from `git credential fill`. CI runs ShellCheck, an Eleventy dry run, and a
-  PR preview deploy; wait for all three before merging.
+- `gh` (GitHub CLI 2.98) is installed and authenticated as of 2 September
+  2026: `gh pr create --head <branch> --base main --body-file <file>` opens a
+  PR (`--head` is needed explicitly here), `gh pr checks <n> --watch` follows
+  CI, `gh pr merge <n> --merge --delete-branch` lands it. The REST-API route
+  with the token from `git credential fill` still works as a fallback. CI runs
+  `npm test` (validator + Eleventy dry run), ShellCheck over the deploy
+  scripts, a shared-scripts check, and a PR preview deploy; wait for all of
+  them before merging.
+- **Four deploy scripts are shared, byte-identical, with `star-rangers`** —
+  `deploy-lib.sh`, `mail-lib.sh`, `ensure-node.sh` and `cpanel-autopull.sh`
+  (`cpanel-deploy.sh` is each repo's own). Since 24 August 2026 CI's
+  shared-scripts job diffs them against the sibling's `main` (both repos,
+  pointing at each other): pre-existing drift fails, while a PR that is
+  itself changing a shared script only warns, since the identical edit lands
+  in the sibling as its own PR and one of the two has to merge first. So
+  change one of these and land the same edit in `star-rangers` in the same
+  piece of work.
 
 Dermot's DCC submission workflow folders (`Ready for Submission`,
 `Submitted Images`) are in `...\OneDrive\Pictures\DCC\`; he submits via
@@ -342,3 +810,334 @@ Raw camera dumps (JPG + NEF) live in `F:\<NNNXXXXX>\` folders (e.g.
 `C:\Users\Harvey Norman\Dermot Cochran\OneDrive\Pictures\CLAUDE\`.
 Get `year` from EXIF DateTimeOriginal. When choosing from a burst, compare
 frames visually — Laplacian sharpness scores track grass texture, not focus.
+
+**The site itself has no numeric cap** (Dermot's ruling, 23 August 2026,
+reaffirmed 11 September 2026). The masters guideline above is about
+competition curation, not the portfolio.
+
+**The competition pool and the site listing are one gate, read both ways**
+(Dermot's two rulings, 7 October 2026, verbatim): *"Anything flagged as a
+possible competition entry should qualify for the site unless I have ruled
+it out"*, and *"If unlisted from the site, I would probably not enter it for
+competition either."* So a frame in `F:\Competition Masters\` or on the
+Print Candidates register is a site candidate by that fact, and goes up
+unless he has said no to it (as he did for *Feeding the Giraffes*, same
+day); and a page unlisted for quality leaves the entry pool with it, which
+the masters README records beside the file. The first application: *The
+Pinnacle* and *The Nursery Floor* (Great Saltee masters with no page) went
+up the same day, and the two quality unlistings with masters (*Vulture
+Landing, in Mono*, *Chestnut Blossom Branch*) are marked not for entry
+unless he says otherwise. Duplicate-rule unlistings are not quality
+unlistings and keep their place in the pool: *Herring Gull Portrait* stays
+in it. His refinement the same day, verbatim: *"Duplication is a valid
+reason why a competition master might not appear on my site"*, *"or near
+duplication"*. So a master
+with no page, or an unlisted one, is only out of the pool when the reason
+was quality; where the site already shows the same picture in another
+version or a near frame, the master stays eligible and nothing is owed to
+the site.
+
+**The publication bar is best-in-group** (Dermot's ruling, 11 September
+2026, replacing the earlier "as interesting as the site's floor"): a new
+photo must be at least as good as, and preferably better than, every
+existing photo with the same **location, category, setting and subjects**.
+The comparison set is the pages that match on all four; if none does, the
+photo has no peer and the old floor applies. **Under-represented groups get
+flexibility** (Dermot, same evening): with fewer than four existing pages in
+the group, the bar softens toward the floor, since a group that small is
+still being filled rather than refined. Four is the same threshold a subject
+needs before it earns its own page. At four and above, best-in-group holds
+in full. "As good as" is a judgement
+made by looking at the candidate beside its peers at the same size, and
+the PR says which peers it was set against and why it holds up. This is
+the bar for the site; competitions have their own ([[competition-selection-bar]]
+in the memory store, and the masters README). That memory store is Claude Code's
+local one on Dermot's Windows machine; a cloud session cannot read it, so a rule
+that has to hold everywhere belongs in this file, not there.
+
+**Mono conversions carry a higher quality gate than colour** (same ruling,
+restated by Dermot as "a higher quality gate for mono in general"): the
+technical bar for a mono page sits above the bar for any colour page, so
+critically sharp, clean and well exposed are the entry conditions, and the
+mono must then be clearly better in mono than in colour. **Where the gate is judged** (Dermot's question the same night, "what was
+the criterion that lifted the Buffalo"): on the elements that carry the
+picture, at display size. A mono lives on its edges, its masses and its
+tonal contrast; fine texture is secondary. So a frame whose outline, mass
+and eye are sharp and whose softness sits only in texture at 100% (the
+buffalo: horn edge, black bulk against pale grass and the stare all crisp,
+fur soft) can pass when its graphic merit is exceptional. Texture-only
+softness is a penalty to weigh, not a veto; softness on an edge, a mass or
+an eye is a veto. Say which it was in the PR. *Cape Buffalo, in Mono* is the
+worked example, and this criterion, not a waiver, is why it is up. Mono is exceptional on the site, not a
+programme, and the best-in-group bar applies to a mono against the other
+monos in its group as well as against the colour pages.
+
+**An award winner is never taken off the site, whatever other rule points the
+other way** (Dermot, 21 September 2026, in those words). This is the one rule
+here that overrides every other: the best-in-group bar, the swap rule, the
+thinning rule, and any future reason for unlisting. A placing is a fact about
+the work, and the site does not un-say a fact because a later comparison is
+unflattering. It is enforced rather than trusted - `scripts/validate-photos.js`
+fails any page that carries `award:` beside `unlisted: true`, and the failure
+message names this ruling. If a group is over-represented and the weakest frame
+in it happens to be a winner, thin a different one or thin nothing.
+
+**Pages are not removed or renamed** (Dermot's ruling, 11 September 2026):
+a published URL may be linked from outside, and taking a page down or
+changing its slug can break that later. Withdrawals and renames made before
+this date stand and are not an issue; from here on, a photo that should no
+longer show gets `unlisted: true` (above), never a deletion or a rename.
+**Swapping out to unlisted is allowed** (Dermot, same night): when a new
+photo clears the best-in-group bar and makes an existing page in the group
+the weakest, that page may be unlisted in the same change, so the group
+improves rather than merely grows. The swap is named in the PR with the
+reason, it is his call when the two are close, and the unlisted page keeps
+its URL as always.
+
+**Thinning an over-represented group is a second reason to unlist** (Dermot's
+decision, 21 September 2026, and the first use of unlisting with no new photo
+arriving). The swap rule above needs a newcomer to displace someone; this does
+not. Where one afternoon has put several near-interchangeable frames on the
+site, the group may be cut back to the ones that carry it, by the same
+best-in-group comparison, in a change of its own. The worked example is the
+roses: eight of the seventeen Flowers photographs came from St Anne's Park in
+July 2026, five of them a rose alone, and two of those five were the same yellow
+rose in the same light against the same background - two attempts at one
+photograph rather than two photographs. *Amber Rose in Dappled Light* and
+*Golden Rose in Full Bloom* were unlisted; *Blush Rose Unfurling*, *Coral Rose
+Among the Leaves* and *Cream Rose with Crimson Heart* stay, because each is a
+different kind of rose photograph. **The test is one champion per kind, not a
+quota** - nothing here caps how many photographs a group may hold, and a group
+of genuinely different frames is not over-represented however large. Both pages
+keep their URLs, as always.
+
+**Falling below the site's minimum is a third reason to unlist, and being the
+best of a small group is no defence** (Dermot, 2 October 2026, on *Fern
+Croziers*, verbatim: *"It might have been selected as the best of 3 but still
+no longer meets the minimum threshold for the site"*). Best-in-group is a
+relative test and the minimum is an absolute one, and a frame has to pass both.
+The minimum also moves: it is the *current* bar, set by what the site now
+holds, so a page that cleared it when it went up can fall under it later
+without anything about the page changing. A `selected:` flag that the champion
+rule set does not protect a frame from this, because the rule only picks the
+best of what is there; when such a champion is unlisted the flag comes off in
+the same change, and a subject that falls under six listed photographs simply
+stops needing one. A flag he set himself is still his to lift (see *The
+Coalition* below), and an award winner is never unlisted at all.
+
+**The unlisted pages are the negative examples of the bar** (Dermot, same day,
+verbatim: *"The un listed now act as negative examples of images below the
+current bar for the site"*). So before publishing a borderline frame, set it
+beside these and ask whether it is better in the respect that sank them. The
+ones unlisted for quality, and what failed:
+
+| Page | Unlisted | What put it under the bar |
+|---|---|---|
+| *Ghost Herd* | 15 Sept 2026 | too blurry to use even as a creative frame |
+| *Egret, Passing* | 15 Sept 2026 | the same |
+| *Chestnut Blossom Branch* | 2 Oct 2026 | the blossoms are out of focus; the focus fell behind them |
+| *Bumblebee on Giant Scabious* | 2 Oct 2026 | a small, soft subject in flat grey light |
+| *Fern Croziers* | 2 Oct 2026 | depth of field too thin: one edge of one crozier is sharp |
+| *Vulture Landing, in Mono* | 7 Oct 2026 | motion blur on the wing edges and the head lost in its own shadow; mono dropped the only tones (brown secondaries, pink face) that separated the bird from itself. The first mono-gate unlisting: the colour page stays |
+| *African Fish Eagle* | 7 Oct 2026 | the whole bird soft at 100%: no feather edge and no eye on a head-on flight frame; Dermot saw it first on the screensaver. Was the Birds in Flight champion; that page falls under six and needs none |
+| *Puffball with a Fly* | 7 Oct 2026 | focus missed the puffball; the fly is the only sharp thing and the spines are a white blur with the highlights gone. Was a champion on four pages, each of which keeps another |
+| *Bird of Prey at Dawn* | 13 Oct 2026 | Dermot's call. A small silhouette with no shape that names the bird, in a sky full of ISO 10000 grain; the dawn colour is a thin band low in the frame |
+| *Parasol* | 13 Oct 2026 | Dermot's call. A mono with no blacks and no whites, only flat greys, and the cap softens toward the near edge. The site had no colour version, so the parasol leaves altogether |
+| *Vulture Landing* | 13 Oct 2026 | Dermot's call, six days after its mono. The same faults in colour: motion blur on the wing edges, the head turned down into shadow, and the bird small above half a frame of thorn bush |
+| *Cygnet* | 13 Oct 2026 | Dermot's call, the day it went up, after a second look. A heavy crop of a dark frame: the down is grey on near-black water with little tonal separation, and the bird sits low in its own reflection. The lesson for triage is that a crop rescued from a frame he liked for its other bird starts below the bar |
+
+The other unlisted pages are **not** negative examples of quality. They were
+one photograph published twice (a second crop, a second attempt, a second
+frame of one burst): *Amber Rose in Dappled Light*, *Golden Rose in Full
+Bloom*, *Bee Approaching an Amber Rose*, *Herring Gull Portrait*, *The National
+Maritime Museum*, *Pigeon on the Café Tray* and *The Valve Towers*. What they
+teach is the no-duplicates rule, not where the bar is. Keep the table current:
+a quality unlisting adds a row in the same change, with the fault named.
+
+**Find these by counting, not by hunch** (22 September 2026). Asked which pages
+were worth the same look as the gulls, I guessed from album names and guessed
+wrong: Dalkey Island and Great Saltee turned out near the bottom. The check that
+works is to walk every subject page and ask what share of it comes from a single
+album, then look at the top of that list — the Kenya trip supplies the most
+concentrated pages, Aircraft is 4 of 4 from one air show, Birds of Prey 8 of 9
+from one Mara outing. **Concentration is a prompt to look, not a verdict**: of the
+eleven pages over half, Winter, Elephants, Birds in Flight, Antelope and Martello
+Towers were clean, and Aircraft's two Mustang stacks are two pictures because one
+is a flowing arc at even scale and the other puts a single aircraft huge in frame.
+Four pairs did come out of it, read the same way as the herring gulls — one scene,
+two frames, one tighter — and three were unlisted: *Bee Approaching an Amber Rose*
+(the same rose and the same bee, which crawls onto the stamens between frames),
+*The Valve Towers* and *The National Maritime Museum*. **The fourth stayed, and
+why it stayed is the rule worth keeping.** *The Coalition* is the same two lions
+in the same grass as *Lion Portrait at Dusk* and is flat and underexposed beside
+it — but it carries `selected: true`, and Dermot left it listed: **a `selected:`
+flag is a taste call and outranks a technical read against the frame**, and it is
+the only photograph on the site showing two males together, which is what the word
+means. So check for `selected:` before proposing an unlisting, say so when it is
+there, and let him decide rather than treating his answer to a comparison as
+consent to drop his own pick. Note the shape of the bee one:
+the plain version of that rose was already unlisted in the roses pass, and the
+bee frame survived only because it sat on a different page — **a thinning pass
+cleans the page it is looking at, not the frame**, so a scene can survive on a
+second page it also carries.
+
+**A burst of related near-duplicates is material, not a problem** (23
+August 2026). Where several frames of a burst combine in interesting ways,
+stacking composites and small GIFs are allowed and *encouraged* — the burst
+stacks (*Nine Mustangs over Bray*, *Three Suns over the Mara*) are the
+worked examples of the stacking half. The no-duplicates rule still governs
+the individual frames: publish the combination or the best single frame,
+not the burst spread across several pages.
+
+**Near-duplicates: the three grounds for a second page** (Dermot's ruling,
+11 September 2026). Two versions of one raw may each have a page on any one
+of these, each sufficient by itself:
+
+1. **Different competition awards** — each version placed somewhere, and an
+   awarded page must show the exact version that won.
+2. **Mono versus colour** — a monochrome edit and a colour edit are two
+   pictures, at the same crop or not.
+3. **A very different composition** — a crop that changes what the picture
+   is about, not a trim.
+
+Outside those three, the no-duplicates rule holds: the same frame at two
+sizes, a light recrop, or a burst spread across pages is one page. Each
+version still clears the site's floor on its own merits. **The worked example
+of the rule catching something already published** is *Herring Gull Portrait*
+and *Herring Gulls Resting on the Rock* (22 September 2026): the same herring
+gull in the same pose on the same lichen ridge, same companion behind, same
+weed at the right edge, the second a tighter crop of the first. The companion's
+head has turned between them, so they are two frames of one burst rather than
+one file cropped twice — the same answer either way. Dermot kept the tighter
+crop, where the black-and-white wingtip becomes the incident and the companion
+reads as a bird instead of a white lump; *Herring Gull Portrait* is unlisted and
+keeps its URL. **The second instance came the same day**: *Table for One* and
+*Pigeon on the Café Tray* are the same pigeon on the same tray on the same
+table, a crop apart. *Table for One* stays — the empty seats and the cobbles
+are what make it a joke rather than a bird portrait, and it is the Birds
+champion — and *Pigeon on the Café Tray* is unlisted. **Two frames that differ only in how far in you cropped are one
+photograph**, and the cue that found this one was a subject page showing five
+frames from a single afternoon side by side — worth doing deliberately when one
+outing dominates a page. A GIF has no precedent on the
+site yet — before the first one, check the pipeline actually carries `.gif`
+(the `image:` field, Eleventy passthrough, and `photo.njk`) rather than
+assuming it.
+
+## Which model does which work
+
+Dermot's direction, 11 October 2026, matching the rule of the same day in
+`star-rangers`'s `CLAUDE.md`. Opus is the default here; Fable's quota is
+the one he runs out of.
+
+- **Opus: taste and judgement.** Best-in-group comparisons, subject
+  champions (ties still go to him), the mono gate, near-duplicates and
+  proposed unlistings, subject and competition tagging, alt text checked
+  against the frame, the people check, and review of anything a subagent did.
+- **Fable: the notes under a photograph, when needed.** A note is short
+  prose in the withholding voice (*Notes on a photograph*, and `STYLE.md`),
+  which is the one kind of work here that Fable is kept for. Use it for a
+  note that needs the voice, not for a mechanical edit to an existing note.
+- **Sonnet: work the validator or `npm test` checks.** Validator failures,
+  BOM fixes, `location` and `album` spelling, template and Eleventy changes,
+  `lib/derivations.js` with its tests, and counts across the photo files.
+  Delegate it to a subagent with a clear brief; Opus reviews the diff and
+  approves it, and it merges when CI is green.
+- **Opus approves a Sonnet or Haiku subagent's work and escalates as
+  needed** (Dermot, 11 October 2026): a judgement Opus should not make alone
+  goes to Fable where one is available, otherwise to Dermot directly as
+  choices. Taste calls that are his by this file's own rules stay his.
+  Haiku may also work under a Sonnet subagent, its searches and summaries
+  feeding Sonnet's job as input; approval still comes from Opus, never from
+  Sonnet.
+
+A subagent runs on its parent session's model unless the call names
+another, so name the model on every delegation. No model in a cloud session
+can start from the originals on `F:`; that stays a `needs-desktop` step.
+
+**Haiku makes no edits here** (Dermot, 11 October 2026); it may run
+read-only searches. **The Chrome extension runs on Opus** for anything that
+signs in, submits or posts (a Pixoroo submission is the usual case), on
+Sonnet for read-only browsing such as checking `/version.txt`, and never on
+Haiku: it acts in Dermot's own Chrome with his sign-ins, and a web page can
+carry text written to steer the model.
+
+## Work that needs the desktop
+
+A Claude Code cloud session has this repository in a fresh container and
+nothing else of Dermot's. It cannot read `F:\` (his photographs, the working
+folder and its TODO lists), the local memory store, or a key that lives only
+on his Windows machine, and the GitHub path it pushes through cannot publish
+tags. **When a piece of work stops at one of those limits, the step that is
+left gets an issue here labelled `needs-desktop`**, saying what is owed, the
+exact command or file where it is known, and anything it waits on. A sentence
+in a pull request body or in a session's closing report is not a record,
+because nothing reads those again (added 5 October 2026 at Dermot's
+direction, after a release tag in `star-rangers` sat unpushed for three days
+with a sentence in a merged pull request as the only note that it was owed).
+
+A desktop session lists the whole queue, across every repository, with
+`gh search issues --owner dermot-r-cochran --label needs-desktop --state open`.
+It checks the queue when it starts work, does what it can, and closes each
+issue with a line saying what was done.
+
+Two limits on what goes in. Issues here are publicly readable, so nothing
+personal goes in one. And a decision that is Dermot's (which frame, which
+crop, whether a photograph belongs on the site) is not a desktop step: it
+stays in the pull request that names it and does not take this label.
+
+In this repository the usual case is **the source frame**. The NEFs, the card
+folders and the competition masters are on `F:\` (*Source material* above),
+so adding a photograph, re-cropping from the original or developing again
+from the RAW starts there. A cloud session can change a page, a note, a tag
+or a template; it cannot produce or replace an image file from the original.
+Name the frame number and the folder if they are known.
+
+## Related repositories
+
+Four other repositories of Dermot's read from this one, and none writes to it
+(added 29 September 2026, after a session had to discover the second game by
+listing his repositories: nothing here named it; the fourth reader was added
+the same day, having been missed by the first pass even though this file
+already told its story under *Verifying and shipping*). Each CLAUDE.md names
+its own neighbours; the whole map of the account's public repositories is
+`RELATED-REPOSITORIES.md` in `dermot-r-cochran/star-rangers`. This section is
+the part a session here needs, so a change here can be checked against what
+consumes it.
+
+- **`dermot-r-cochran/star-rangers`** shares four byte-identical deploy scripts
+  with this repo (see *Verifying and shipping*), and its
+  `scripts/build-photo-catalogue.js` builds a committed catalogue of the
+  photographs here from a sibling checkout, so its site can offer Dermot's own
+  frames before generating an image. A retitle or unlisting here is invisible
+  to that catalogue until it is rebuilt.
+- **`dermot-r-cochran/photo-safari-tutorial-game`** — *Photo Safari*, a
+  one-file tutorial game about wildlife photography, served at
+  https://dermot-r-cochran.github.io/photo-safari-tutorial-game/ from its
+  `main`. Its `images/` holds copies of this site's frames at site size (26 at
+  the time of writing), shown after a stop as the frame the lesson was learned
+  on, under this repository's CC BY-NC-ND terms rather than its own licence.
+- **`dermot-r-cochran/photo-safari-range`** — *Photo Safari Range*, the
+  tutorial's sibling: a one-file arcade where the shutter follows the subject,
+  served at https://dermot-r-cochran.github.io/photo-safari-range/ from its
+  `main`. Same arrangement: copies of this site's frames (57 at the time of
+  writing), shown beside the player's plate as a comparison, under this
+  repository's photo licence.
+- **`dermot-r-cochran/applied-statistics-for-AI-engineers`** — a one-file
+  statistics course whose two real datasets are built from this repository.
+  Reference Set 2 is real frames with real EXIF and a real kept-or-not
+  ground truth; Reference Set 3 crosses the `subjects:` tags on 179 listed
+  photographs with two crude rules over the `alt` text, rebuilt by its
+  `tools/build-reference-set-3.js` from a sibling checkout of this repo. The
+  alt text itself never ships there (these pages are CC BY-NC-ND, that
+  repository CC BY 4.0). Building it is how the three BOM-marked pages were
+  found. A retag, a rewritten alt or an unlisting here changes what a rebuild
+  produces, and its lessons quote figures from the committed csv, so a
+  rebuild there is a deliberate act with its own check, not a side effect.
+
+Two consequences for work here. The games copy files rather than link pages,
+so nothing they do can break on a change in this repository, and nothing here
+needs to wait for them; but a photograph that is unlisted or re-edited here
+stays as it was in their `images/` until someone copies it again, so say so in
+the PR when a frame they carry changes. And the About page names both games
+(since PR #236); if a fifth consumer arrives, it joins this list and, where a
+reader would care, that paragraph.

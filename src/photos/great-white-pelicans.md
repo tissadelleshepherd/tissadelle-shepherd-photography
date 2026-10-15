@@ -9,4 +9,5 @@ image: "great-white-pelicans.jpg"
 alt: "A raft of great white pelicans gathered together on rippled blue water"
 order: 22
 competitions: [DCC, WNPA, IPF-Nature, IPF-Wildlife]
+subjects: [Waterbirds]
 ---

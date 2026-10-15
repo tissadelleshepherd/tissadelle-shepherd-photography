@@ -10,4 +10,5 @@ alt: "A family of elephants walking away along a track into open plains at dusk,
 order: 20
 setting: "Natural"
 competitions: [DCC, WNPA]
+subjects: [Elephants, Silhouettes, Sunrise and Sunset]
 ---

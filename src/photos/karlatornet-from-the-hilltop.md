@@ -9,4 +9,5 @@ image: "karlatornet-hilltop.jpg"
 alt: "Karlatornet skyscraper rising above Gothenburg's rooftops, viewed from a rocky hillside park"
 order: 7
 competitions: [DCC]
+subjects: [Skylines]
 ---

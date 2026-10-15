@@ -9,4 +9,5 @@ image: "irelands-eye-herring-gull-calling.jpg"
 alt: "An adult herring gull standing upright on orange and grey lichen-covered rock, facing the camera with its yellow bill open in a call, a blue numbered ring on one leg, with grey sea and heavy overcast cloud behind"
 order: 107
 competitions: [DCC, WNPA, IPF-Nature, IPF-Wildlife]
+subjects: [Gulls]
 ---

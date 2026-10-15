@@ -1,0 +1,438 @@
+#!/usr/bin/env node
+// Front-matter validation for src/photos/*.md - the checks `eleventy --dryrun`
+// structurally cannot do. The dry run proves the templates render; it does not
+// prove a photo carries the fields the archive pages group by, that a
+// `competitions:` tag is spelled from the real vocabulary (a typo'd IPF-Nature
+// silently misfiles a plant on /wild-or-cultivated/), that `image:` points at
+// a file that exists, or that two photos don't claim the same `order` slot
+// (the homepage slideshow picks "newest" by order, so a collision makes that
+// pick arbitrary).
+//
+// Failures exit non-zero and are for states that are always wrong. Warnings
+// print and pass: a Landscape/Documentary/Creative photo with no `setting:`
+// is a judgement not yet made, and CLAUDE.md records that showing as absence
+// on /natural-or-built/ is deliberate - so it is surfaced, never enforced.
+//
+// gray-matter is the same front-matter parser Eleventy itself uses, so what
+// validates here is what the build will see - which is exactly why a UTF-8
+// byte order mark needs a check of its own: gray-matter strips it, so the
+// build is unaffected and the mark survives unseen, while a reader that does
+// not strip it sees no front matter at all and silently drops the photo.
+const fs = require("fs");
+const path = require("path");
+const matter = require("gray-matter");
+// The subject nesting is declared once, in the library the site builds from, so
+// the check and the pages cannot drift apart.
+const { SUBJECT_PARENTS, SUBJECT_SEE_ALSO, subjectsWithParents } = require("../lib/derivations.js");
+const { jpegSize, readPanelSpec, panelSlices } = require("../lib/panels.js");
+
+const ROOT = path.join(__dirname, "..");
+const PHOTOS_DIR = path.join(ROOT, "src", "photos");
+const IMAGES_DIR = path.join(ROOT, "src", "images", "photos");
+
+// The vocabulary the site actually uses - see CLAUDE.md's "Category rules"
+// and "Competition eligibility tagging". A new category or competition is a
+// deliberate decision; add it here in the same change that introduces it.
+const CATEGORIES = new Set([
+  "Wildlife",
+  "Urban Wildlife",
+  "Landscape",
+  "Architecture",
+  "Nature",
+  "Macro",
+  "Documentary",
+  "Creative"
+]);
+const COMPETITIONS = new Set(["DCC", "WNPA", "IPF-Nature", "IPF-Wildlife"]);
+const SETTINGS = new Set(["Natural", "Altered", "Built", "Mixed"]);
+// Subjects - overlapping subject and treatment tags, any number per photo
+// (3 September 2026, CLAUDE.md's "Subjects"). Controlled here for the same
+// reason the categories are: free text drifts, and "Big Cats", "big cats"
+// and "Cats" is three pages for one subject. A subject earns its place at
+// two photos (Dermot, 21 September 2026: "two or three can be a group",
+// confirmed as covering the creation of new subject groups and not only the
+// comparison set); the floor is checked at the end and WARNS, because a
+// subject slipping under it is a decision to retire it, not a broken build.
+// A new subject is added here in the same change that first tags a photo
+// with it.
+const SUBJECTS = new Set([
+  "Acacias",
+  "Aircraft",
+  "Antelope",
+  "Autumn",
+  "Bees",
+  "Birds",
+  "Blossom",
+  "Birds in Flight",
+  "Birds of Prey",
+  "Boats and Ships",
+  "Buffalo",
+  "Cloud",
+  "Coast",
+  "Cormorants",
+  "Drought",
+  "Elephants",
+  "Feeding",
+  "Flowers",
+  "Fungi",
+  "Garden Flowers",
+  "Gulls",
+  "Insects",
+  "Lions",
+  "Martello Towers",
+  "Mixed Herds",
+  "Monochrome",
+  "Mountains",
+  "Reflections",
+  "Rhinos",
+  "Sea",
+  "Seabirds",
+  "Silhouettes",
+  "Skylines",
+  "Spring",
+  "Storms",
+  "Sunrise and Sunset",
+  "Trees",
+  "Waders",
+  "Waterbirds",
+  "Waterfronts and Harbours",
+  "Wild Cats",
+  "Winter",
+  "Woodland",
+  "Young Animals"
+]);
+const SUBJECT_FLOOR = 2;
+// At this many photographs a /subjects/ page has one champion on /selected/
+const CHAMPION_THRESHOLD = 6;
+// The preferred band for a subject is four to fifteen photographs, and the reason
+// for it (Dermot, 21 September 2026): a subject earns a click when it gathers a
+// kind you would want to browse. The ceiling that WARNS sits higher, at twenty, so
+// that the band stays a preference and only the subjects that have plainly stopped
+// being browsable are surfaced.
+// Under the floor it is too thin to be one; over the ceiling it has quietly become
+// a second category - `Birds` at 51 is a quarter of the site, which is not browsing.
+// The answer above the ceiling is usually to split it into kinds that already exist
+// (Waterbirds, Seabirds, Birds of Prey). Both bounds WARN and neither fails: which
+// photographs carry which subject is his judgement, not the build's.
+const SUBJECT_CEILING = 20;
+// Awarded photos leave /selected/ for their own section at this count
+// (Dermot, 11 September 2026) - the same threshold a subject needs for a page.
+const AWARDS_SECTION_THRESHOLD = 4;
+// The categories .eleventy.js's naturalOrBuilt cannot derive a setting for.
+const SETTING_NEEDED = new Set(["Landscape", "Documentary", "Creative"]);
+const REQUIRED = ["layout", "title", "category", "location", "year", "album", "image", "alt", "order"];
+
+const failures = [];
+const warnings = [];
+
+function fail(file, message) {
+  failures.push(`${file}: ${message}`);
+}
+
+const files = fs
+  .readdirSync(PHOTOS_DIR)
+  .filter((f) => f.endsWith(".md"))
+  .sort();
+
+const ordersSeen = new Map(); // order value -> first file claiming it
+const imagesSeen = new Map(); // image filename -> first file referencing it
+const featuredSeen = new Map(); // numeric featured position -> first file claiming it
+// Two counts, because the floor and the ceiling ask different questions. The
+// tagged count is how often a word is used directly; the page count includes the
+// kinds that roll up into it, which is what a visitor actually browses. A parent
+// may now be tagged rarely and still have a full page - Seabirds is tagged twice
+// and shows ten, because the eight gulls roll up into it.
+const subjectCounts = new Map([...SUBJECTS].map((k) => [k, 0]));
+const subjectPageCounts = new Map([...SUBJECTS].map((k) => [k, 0]));
+// How many photos on each /subjects/ page are on /selected/, by either route.
+// A qualifying page with none has lost its champion (see CHAMPION_THRESHOLD).
+const subjectChampions = new Map([...SUBJECTS].map((k) => [k, 0]));
+let featuredCount = 0;
+let awardCount = 0;
+
+for (const file of files) {
+  let data;
+  try {
+    const raw = fs.readFileSync(path.join(PHOTOS_DIR, file), "utf8");
+    // A UTF-8 byte order mark before the opening `---`. Three files carried
+    // one until 22 September 2026, when a tool in a sibling repository read
+    // 176 photos where this one sees 179. Recorded, not thrown: gray-matter
+    // strips the mark, so the rest of the file's checks still mean something
+    // and are worth running in the same pass.
+    if (raw.charCodeAt(0) === 0xfeff) {
+      fail(file, "starts with a UTF-8 byte order mark - invisible to this build, fatal to any other reader of the front matter; re-save the file as UTF-8 without BOM");
+    }
+    ({ data } = matter(raw));
+  } catch (err) {
+    fail(file, `front matter does not parse: ${err.message}`);
+    continue;
+  }
+
+  for (const field of REQUIRED) {
+    if (data[field] === undefined || data[field] === null || data[field] === "") {
+      fail(file, `missing required field \`${field}\``);
+    }
+  }
+
+  if (data.layout !== undefined && data.layout !== "photo.njk") {
+    fail(file, `layout is "${data.layout}", expected "photo.njk"`);
+  }
+
+  if (data.category !== undefined && !CATEGORIES.has(data.category)) {
+    fail(file, `unknown category "${data.category}" - the categories in use are: ${[...CATEGORIES].join(", ")}`);
+  }
+
+  if (data.year !== undefined && (!Number.isInteger(data.year) || data.year < 1900 || data.year > 2100)) {
+    fail(file, `year "${data.year}" is not a plausible integer year`);
+  }
+
+  if (data.order !== undefined) {
+    if (!Number.isInteger(data.order) || data.order < 0) {
+      fail(file, `order "${data.order}" is not a non-negative integer`);
+    } else if (ordersSeen.has(data.order)) {
+      fail(file, `order ${data.order} is already claimed by ${ordersSeen.get(data.order)} - the homepage picks "newest" by order, so a collision makes that pick arbitrary`);
+    } else {
+      ordersSeen.set(data.order, file);
+    }
+  }
+
+  // `unlisted:` keeps the page but drops it from every list. Only the
+  // literal true is accepted: a quoted "true" would read as unlisted to a
+  // human and listed to the build. It contradicts `featured:` (a slide that
+  // cannot show), `selected:` (a pick that cannot show) and `award:` (a
+  // winner is always on the site, by Dermot's rule), so those fail.
+  // The award case is not a tidiness check but an absolute (Dermot,
+  // 21 September 2026: an award winner would never be removed from the
+  // site no matter any other rule). It overrides the best-in-group bar,
+  // the swap rule and the thinning rule alike, so this failure is the
+  // one that must never be argued around.
+  if (data.award !== undefined) awardCount += 1;
+
+  if (data.unlisted !== undefined) {
+    if (data.unlisted !== true) {
+      fail(file, `unlisted ${JSON.stringify(data.unlisted)} must be exactly true - remove the key for a listed photo`);
+    } else {
+      for (const key of ["featured", "selected", "award"]) {
+        if (data[key] !== undefined) {
+          const why = key === "award"
+            ? "an award winner is never taken off the site, whatever other rule points the other way (Dermot, 21 September 2026)"
+            : `the page would be in no list, so the ${key} could never show`;
+          fail(file, `unlisted: true cannot be combined with ${key}: - ${why}`);
+        }
+      }
+    }
+  }
+  const unlisted = data.unlisted === true;
+
+  // `featured:` drives the homepage slideshow, whose selection treats any
+  // truthy value as a featured slide but only a NUMBER as a fixed position -
+  // so a quoted "1" silently becomes an unranked slide, and 0 or false,
+  // being falsy, silently behave as unflagged. Only `true` and positive
+  // integers mean what an author could intend; not-featured = omit the key.
+  if (data.featured !== undefined) {
+    if (data.featured === true) {
+      featuredCount += 1;
+    } else if (Number.isInteger(data.featured) && data.featured >= 1) {
+      featuredCount += 1;
+      if (featuredSeen.has(data.featured)) {
+        fail(file, `featured position ${data.featured} is already claimed by ${featuredSeen.get(data.featured)} - two photos cannot fix the same slide, and which wins is arbitrary`);
+      } else {
+        featuredSeen.set(data.featured, file);
+      }
+    } else {
+      fail(file, `featured ${JSON.stringify(data.featured)} must be true or a positive integer - a quoted number reads as an unranked slide, and 0/false silently behave as unflagged; remove the key for a photo that is not featured`);
+    }
+  }
+
+  // `competitions` must always be present, possibly as an empty list -
+  // "eligible for nothing" is itself an evaluation (CLAUDE.md), and an absent
+  // key is indistinguishable from a photo nobody assessed.
+  if (data.competitions === undefined) {
+    fail(file, "missing `competitions:` - use an empty list [] for a photo eligible for nothing");
+  } else if (!Array.isArray(data.competitions)) {
+    fail(file, "`competitions:` must be a list, e.g. [DCC, WNPA]");
+  } else {
+    for (const tag of data.competitions) {
+      if (!COMPETITIONS.has(tag)) {
+        fail(file, `unknown competitions tag "${tag}" - known tags: ${[...COMPETITIONS].join(", ")}. A typo here silently misfiles the photo on /wild-or-cultivated/ and /natural-or-built/`);
+      }
+    }
+    if (new Set(data.competitions).size !== data.competitions.length) {
+      fail(file, "duplicate entries in `competitions:`");
+    }
+  }
+
+  // `subjects:` is optional - a subject with one or two frames carries none,
+  // and an absent key means exactly that. Present, it must be a list drawn
+  // from the vocabulary above; an unknown word would build a page of one.
+  if (data.subjects !== undefined) {
+    if (!Array.isArray(data.subjects)) {
+      fail(file, "`subjects:` must be a list, e.g. [Birds of Prey, Silhouettes]");
+    } else {
+      // what the /subjects/ pages will actually show: the kinds carried plus
+      // the wider kinds they roll up into
+      if (!unlisted) {
+        const isChampion = data.selected === true || data.award !== undefined;
+        for (const s of subjectsWithParents(data.subjects)) {
+          if (subjectPageCounts.has(s)) subjectPageCounts.set(s, subjectPageCounts.get(s) + 1);
+          if (isChampion && subjectChampions.has(s)) subjectChampions.set(s, subjectChampions.get(s) + 1);
+        }
+      }
+      for (const s of data.subjects) {
+        if (SUBJECTS.has(s)) {
+          // The floor is about how thin a /subjects/ page looks, and an
+          // unlisted photo is not on it, so it does not count toward it.
+          if (!unlisted) {
+            subjectCounts.set(s, subjectCounts.get(s) + 1);
+            // tagging a kind and the kind it sits inside is redundant since the
+            // rollup of 21 September 2026, and makes both counts lie
+            const parent = SUBJECT_PARENTS[s];
+            if (parent && data.subjects.includes(parent)) {
+              fail(file, `subject "${s}" already sits inside "${parent}" - tag the narrowest kind only; the wider one is added by the rollup (lib/derivations.js)`);
+            }
+          }
+        } else {
+          fail(file, `unknown subject "${s}" - known subjects: ${[...SUBJECTS].join(", ")}. A new subject joins the vocabulary in scripts/validate-photos.js in the change that first tags a photo with it, and needs two photos to earn its place`);
+        }
+      }
+      if (new Set(data.subjects).size !== data.subjects.length) {
+        fail(file, "duplicate entries in `subjects:`");
+      }
+    }
+  }
+
+  // An invalid `setting:` is worse than a missing one - naturalOrBuilt
+  // returns null for it, so the typo reads back as a deliberate absence.
+  // `wild_or_cultivated:` states the main subject's own case where the
+  // IPF-Nature tag cannot be carried for a reason that is not cultivation
+  // (Dermot, 8 October 2026, Brackets at the Root: a wild fungus beside a
+  // gravel path). Two values, and only where the facet applies.
+  if (data.wild_or_cultivated !== undefined) {
+    if (data.wild_or_cultivated !== "Wild" && data.wild_or_cultivated !== "Cultivated") {
+      fail(file, `wild_or_cultivated ${JSON.stringify(data.wild_or_cultivated)} must be Wild or Cultivated`);
+    } else if (data.category !== "Nature" && data.category !== "Macro") {
+      fail(file, `wild_or_cultivated: is only read on a Nature or Macro page (this one is ${data.category})`);
+    }
+  }
+  if (data.setting !== undefined && !SETTINGS.has(data.setting)) {
+    fail(file, `unknown setting "${data.setting}" - must be one of: ${[...SETTINGS].join(", ")}`);
+  }
+  if (
+    data.setting === undefined &&
+    SETTING_NEEDED.has(data.category) &&
+    !(Array.isArray(data.competitions) && data.competitions.includes("IPF-Nature"))
+  ) {
+    warnings.push(`${file}: no \`setting:\` and none derivable - will not appear on /natural-or-built/ (deliberate if the judgement is unmade; add setting: Natural | Altered | Built | Mixed to place it)`);
+  }
+
+  if (typeof data.image === "string" && data.image) {
+    // .jpg only until the pipeline is verified for anything else - CLAUDE.md's
+    // GIF rule: before the first .gif, check the image: field, the Eleventy
+    // passthrough and photo.njk actually carry it, then widen this check in
+    // the same change.
+    if (!/\.jpe?g$/i.test(data.image)) {
+      fail(file, `image "${data.image}" is not a .jpg - the pipeline is only verified for JPEG (see CLAUDE.md's GIF note before widening this)`);
+    }
+    if (!fs.existsSync(path.join(IMAGES_DIR, data.image))) {
+      fail(file, `image "${data.image}" not found in src/images/photos/`);
+    }
+    if (imagesSeen.has(data.image)) {
+      fail(file, `image "${data.image}" is already used by ${imagesSeen.get(data.image)} - the no-duplicates rule: publish the combination or the best single frame, not both`);
+    } else {
+      imagesSeen.set(data.image, file);
+    }
+  }
+
+  // `panels:` stacks a panel picture on a phone by cutting the one JPEG into
+  // slices (lib/panels.js). Checked against the image itself: a gutter or
+  // frame width a few pixels out would cut every slice off its panel edge,
+  // and the page would still build and look nearly right.
+  if (data.panels !== undefined) {
+    const { spec, error } = readPanelSpec(data.panels);
+    const imagePath = typeof data.image === "string" ? path.join(IMAGES_DIR, data.image) : null;
+    if (error) {
+      fail(file, `panels: ${error}`);
+    } else if (imagePath && fs.existsSync(imagePath)) {
+      const size = jpegSize(fs.readFileSync(imagePath));
+      if (!size) {
+        fail(file, `panels: cannot read the size of "${data.image}" to cut it into panels`);
+      } else {
+        try {
+          panelSlices(size, spec);
+        } catch (err) {
+          fail(file, `panels: ${err.message} - measure the gutter and frame in the image again`);
+        }
+      }
+    }
+  }
+}
+
+// The inverse check: a file on disk no photo references is either an upload
+// whose .md was forgotten (the photo silently isn't on the site) or a
+// leftover from a rename (dead weight every deploy rsyncs forever).
+for (const img of fs.readdirSync(IMAGES_DIR).sort()) {
+  if (!imagesSeen.has(img)) {
+    fail(`src/images/photos/${img}`, "not referenced by any photo page - add the missing src/photos/*.md or remove the file");
+  }
+}
+
+// The slideshow is capped at 10 slides, so featuring more than 10 photos
+// silently drops the back of the sequence. CLAUDE.md documents the drop as
+// intended behaviour, so it is surfaced rather than enforced.
+if (featuredCount > 10) {
+  warnings.push(`${featuredCount} photos carry \`featured:\` but the homepage slideshow caps at 10 - the back of the sequence will not appear`);
+}
+
+// Four or more awarded photos leave /selected/ for a section of their own
+// (Dermot's direction, 11 September 2026). The section does not exist yet, so
+// reaching the count is a piece of work to do, not an error: surface it.
+if (awardCount >= AWARDS_SECTION_THRESHOLD) {
+  warnings.push(`${awardCount} photos carry \`award:\` - at ${AWARDS_SECTION_THRESHOLD} or more the winners move out of /selected/ into their own section (CLAUDE.md, "Adding a photo")`);
+}
+
+// A see-also line renders a link per name (lib/derivations.js), so a name
+// outside the vocabulary - a typo, or a subject since retired - is a dead
+// link on a live page. Enforced, because nothing else would show it.
+for (const [s, related] of Object.entries(SUBJECT_SEE_ALSO)) {
+  for (const name of [s, ...related]) {
+    if (!SUBJECTS.has(name)) {
+      fail("lib/derivations.js", `SUBJECT_SEE_ALSO names "${name}", which is not in the subject vocabulary - the link would 404`);
+    }
+  }
+}
+
+// A subject under the floor makes a /subjects/ page too thin to browse. It is
+// a judgement - retire the subject, or tag the photos that should carry it -
+// so it is surfaced, never enforced.
+for (const [s, n] of subjectPageCounts) {
+  const tagged = subjectCounts.get(s);
+  const rolled = n > tagged ? ` (${tagged} tagged, the rest rolled up)` : "";
+  if (n < SUBJECT_FLOOR) {
+    warnings.push(`subject "${s}" shows ${n} photo(s)${rolled}, under the floor of ${SUBJECT_FLOOR} - retire it from the vocabulary or tag the photos that should carry it`);
+  } else if (n > SUBJECT_CEILING) {
+    warnings.push(`subject "${s}" shows ${n} photos${rolled}, over the ceiling of ${SUBJECT_CEILING} - it is becoming a second category rather than a kind to browse; consider splitting it`);
+  }
+}
+
+// Every subject page of CHAMPION_THRESHOLD or more photographs holds a
+// champion on /selected/ (Dermot's rule, 22 September 2026). Unlike the floor
+// and ceiling above this is enforced, because a page losing its champion is
+// silent: an unlisting, a retag or a pass over the flags can take the last one
+// away and nothing else would say so. The fix is a taste call - look at the
+// page and pick one - so the message names the page rather than guessing.
+for (const [s, n] of subjectPageCounts) {
+  if (n >= CHAMPION_THRESHOLD && subjectChampions.get(s) === 0) {
+    fail(
+      `subject "${s}"`,
+      `shows ${n} photos and none is on /selected/ - a subject page of ${CHAMPION_THRESHOLD} or more has one champion carrying \`selected: true\` (CLAUDE.md, the \`selected:\` rule). Compare the page and flag the best of them`
+    );
+  }
+}
+
+for (const w of warnings) console.warn(`WARN  ${w}`);
+if (failures.length) {
+  for (const f of failures) console.error(`FAIL  ${f}`);
+  console.error(`\nPhoto validation failed: ${failures.length} problem(s) across ${files.length} photos.`);
+  process.exit(1);
+}
+console.log(`Photo validation passed (${files.length} photos, ${imagesSeen.size} images${warnings.length ? `, ${warnings.length} warning(s)` : ""}).`);

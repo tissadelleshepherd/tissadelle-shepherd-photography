@@ -1,0 +1,243 @@
+// Unit tests for lib/derivations.js — the derivation rules that regress
+// silently: a branch-order change in naturalOrBuilt or a slideshow-selection
+// tweak alters where photos file with no build failure and no visible error.
+// Built-in node:test, no new dependencies; run via `node --test test/` (part
+// of `npm test`).
+const test = require("node:test");
+const assert = require("node:assert/strict");
+
+const {
+  countryOf,
+  groupPhotosBy,
+  isListed,
+  listedPhotos,
+  naturalOrBuilt,
+  selectHomepagePhotos,
+  slugify,
+  subjectsWithParents,
+  SUBJECT_SEE_ALSO,
+  wildOrCultivated
+} = require("../lib/derivations.js");
+
+// A minimal photo-shaped object: the functions only ever read `data`.
+const photo = (data) => ({ data });
+
+test("countryOf takes the last comma-separated segment", () => {
+  assert.equal(countryOf("Maasai Mara, Kenya"), "Kenya");
+  assert.equal(countryOf("Enkewa, Maasai Mara, Kenya"), "Kenya");
+});
+
+test("countryOf treats a comma-free location as a country in its own right", () => {
+  assert.equal(countryOf("Ireland"), "Ireland");
+});
+
+test("countryOf survives a trailing comma and blank segments", () => {
+  assert.equal(countryOf("Dublin, Ireland,"), "Ireland");
+  assert.equal(countryOf("  "), null);
+  assert.equal(countryOf(null), null);
+});
+
+test("countryOf files listed open water under At sea", () => {
+  assert.equal(countryOf("Baltic Sea"), "At sea");
+});
+
+test("wildOrCultivated: animals are out of scope, whatever the tags", () => {
+  // Plants-only since 24 September 2026: the category already says Wildlife.
+  assert.equal(wildOrCultivated({ category: "Wildlife", competitions: ["DCC"] }), null);
+  assert.equal(wildOrCultivated({ category: "Wildlife", competitions: ["IPF-Nature", "IPF-Wildlife"] }), null);
+  assert.equal(wildOrCultivated({ category: "Urban Wildlife", competitions: [] }), null);
+});
+
+test("wildOrCultivated: the front-matter field states the main subject's case and wins", () => {
+  // Brackets at the Root, 8 October 2026: a wild fungus with a path in frame
+  assert.equal(wildOrCultivated({ category: "Nature", competitions: ["DCC", "WNPA"], wild_or_cultivated: "Wild" }), "Wild");
+  assert.equal(wildOrCultivated({ category: "Nature", competitions: ["DCC", "IPF-Nature"], wild_or_cultivated: "Cultivated" }), "Cultivated");
+  assert.equal(wildOrCultivated({ category: "Wildlife", competitions: [], wild_or_cultivated: "Wild" }), null);
+  assert.equal(wildOrCultivated({ category: "Nature", competitions: ["DCC"], wild_or_cultivated: "wild" }), "Cultivated");
+});
+
+test("wildOrCultivated: plants are decided by the IPF-Nature tag", () => {
+  assert.equal(wildOrCultivated({ category: "Nature", competitions: ["DCC", "IPF-Nature"] }), "Wild");
+  assert.equal(wildOrCultivated({ category: "Nature", competitions: ["DCC"] }), "Cultivated");
+  assert.equal(wildOrCultivated({ category: "Macro", competitions: [] }), "Cultivated");
+});
+
+test("wildOrCultivated: other categories are out of scope, not Cultivated", () => {
+  assert.equal(wildOrCultivated({ category: "Architecture", competitions: ["DCC"] }), null);
+  assert.equal(wildOrCultivated({ category: "Landscape", competitions: ["IPF-Nature"] }), null);
+});
+
+test("naturalOrBuilt: an explicit setting always wins", () => {
+  assert.equal(naturalOrBuilt({ category: "Wildlife", setting: "Altered" }), "Altered");
+  assert.equal(naturalOrBuilt({ category: "Architecture", setting: "Mixed" }), "Mixed");
+});
+
+test("naturalOrBuilt: an invalid setting reads as absence, never a guess", () => {
+  assert.equal(naturalOrBuilt({ category: "Landscape", setting: "Urban" }), null);
+});
+
+test("naturalOrBuilt: category defaults", () => {
+  assert.equal(naturalOrBuilt({ category: "Architecture" }), "Built");
+  assert.equal(naturalOrBuilt({ category: "Urban Wildlife" }), "Built");
+  assert.equal(naturalOrBuilt({ category: "Wildlife" }), "Natural");
+  assert.equal(naturalOrBuilt({ category: "Nature" }), "Natural");
+  assert.equal(naturalOrBuilt({ category: "Macro" }), "Natural");
+});
+
+test("naturalOrBuilt: IPF-Nature settles the underivable categories", () => {
+  assert.equal(
+    naturalOrBuilt({ category: "Landscape", competitions: ["IPF-Nature"] }),
+    "Natural"
+  );
+});
+
+test("naturalOrBuilt: no default and no override means absent, not wrong", () => {
+  assert.equal(naturalOrBuilt({ category: "Landscape", competitions: ["DCC"] }), null);
+  assert.equal(naturalOrBuilt({ category: "Documentary" }), null);
+  assert.equal(naturalOrBuilt({ category: "Creative", competitions: [] }), null);
+});
+
+test("slugify maps the standalone Scandinavian letters instead of dropping them", () => {
+  assert.equal(slugify("Søndergård"), "sondergard");
+  assert.equal(slugify("Ærø, Denmark"), "aero-denmark");
+});
+
+test("slugify keeps the base letter of composed accents", () => {
+  // Without NFD decomposition "Malmö, Sweden" would collapse to "-sweden".
+  assert.equal(slugify("Malmö, Sweden"), "malmo-sweden");
+  // ...and therefore lands on the same slug as the plain spelling.
+  assert.equal(slugify("Malmo, Sweden"), "malmo-sweden");
+});
+
+test("groupPhotosBy buckets by slug and sorts by key", () => {
+  const groups = groupPhotosBy(
+    [photo({ album: "B Album" }), photo({ album: "A Album" }), photo({ album: "B Album" })],
+    "album"
+  );
+  assert.deepEqual(groups.map((g) => [g.key, g.items.length]), [["A Album", 1], ["B Album", 2]]);
+  assert.equal(groups[1].slug, "b-album");
+});
+
+test("groupPhotosBy drops photos whose key is empty", () => {
+  const groups = groupPhotosBy([photo({ album: "" }), photo({})], "album");
+  assert.deepEqual(groups, []);
+});
+
+test("groupPhotosBy files a list-valued key under every entry", () => {
+  // Subjects overlap: one photo lands in several groups, and a group holds
+  // every photo that names it, whichever position it sits at in the list.
+  const lion = photo({ subjects: ["Wild Cats", "Big Five", "Silhouettes"] });
+  const elephant = photo({ subjects: ["Big Five"] });
+  const groups = groupPhotosBy([lion, elephant, photo({})], "subjects");
+  assert.deepEqual(
+    groups.map((g) => [g.key, g.items.length]),
+    [["Big Five", 2], ["Silhouettes", 1], ["Wild Cats", 1]]
+  );
+  assert.deepEqual(groups[0].items, [lion, elephant]);
+});
+
+test("groupPhotosBy skips empty entries inside a list and an empty list", () => {
+  const groups = groupPhotosBy([photo({ subjects: ["", "Fungi"] }), photo({ subjects: [] })], "subjects");
+  assert.deepEqual(groups.map((g) => [g.key, g.items.length]), [["Fungi", 1]]);
+});
+
+test("isListed: only the literal true unlists", () => {
+  assert.equal(isListed({}), true);
+  assert.equal(isListed({ unlisted: true }), false);
+  // These shapes are what the validator rejects; until it runs, they must
+  // not silently unlist a photo.
+  assert.equal(isListed({ unlisted: "true" }), true);
+  assert.equal(isListed({ unlisted: 1 }), true);
+  assert.equal(isListed({ unlisted: false }), true);
+});
+
+test("listedPhotos drops unlisted photos and keeps order", () => {
+  const a = photo({ order: 1 });
+  const b = photo({ order: 2, unlisted: true });
+  const c = photo({ order: 3 });
+  assert.deepEqual(listedPhotos([a, b, c]), [a, c]);
+});
+
+// Slideshow fixtures: order doubles as identity so failures name the photo.
+const slide = (order, album, featured) => photo({ order, album, featured });
+
+test("slideshow with no featured flags is pure recency, one slide per album", () => {
+  const picks = selectHomepagePhotos([
+    slide(1, "old"),
+    slide(2, "mid"),
+    slide(3, "mid"),
+    slide(4, "new")
+  ]);
+  assert.deepEqual(picks.map((p) => p.data.order), [4, 3, 1]);
+});
+
+test("numbered featured slides lead in position order, then featured:true, then recency", () => {
+  const picks = selectHomepagePhotos([
+    slide(1, "a"),
+    slide(2, "b", true),
+    slide(3, "c", 2),
+    slide(4, "d", 1),
+    slide(5, "e")
+  ]);
+  assert.deepEqual(picks.map((p) => p.data.order), [4, 3, 2, 5, 1]);
+});
+
+test("a featured photo represents its album instead of the album's newest", () => {
+  const picks = selectHomepagePhotos([
+    slide(1, "shoot", 1),
+    slide(2, "shoot"),
+    slide(3, "other")
+  ]);
+  assert.deepEqual(picks.map((p) => p.data.order), [1, 3]);
+});
+
+test("the cap is 10 slides however many albums exist", () => {
+  const photos = Array.from({ length: 14 }, (_, i) => slide(i + 1, `album-${i + 1}`));
+  const picks = selectHomepagePhotos(photos);
+  assert.equal(picks.length, 10);
+  assert.deepEqual(picks.map((p) => p.data.order), [14, 13, 12, 11, 10, 9, 8, 7, 6, 5]);
+});
+
+test("the input array is not reordered by selection", () => {
+  const photos = [slide(2, "b"), slide(1, "a")];
+  selectHomepagePhotos(photos);
+  assert.deepEqual(photos.map((p) => p.data.order), [2, 1]);
+});
+
+test("subjectsWithParents rolls a kind up into the kind it sits inside", () => {
+  assert.deepEqual(subjectsWithParents(["Gulls"]), ["Gulls", "Seabirds"]);
+  assert.deepEqual(subjectsWithParents(["Lions", "Drought"]), ["Lions", "Wild Cats", "Drought"]);
+});
+
+test("subjectsWithParents does not duplicate a parent that is also tagged", () => {
+  assert.deepEqual(subjectsWithParents(["Gulls", "Seabirds"]), ["Gulls", "Seabirds"]);
+});
+
+test("subjectsWithParents leaves a subject with no parent alone, and handles nothing", () => {
+  assert.deepEqual(subjectsWithParents(["Flowers"]), ["Flowers"]);
+  assert.deepEqual(subjectsWithParents([]), []);
+  assert.deepEqual(subjectsWithParents(undefined), []);
+});
+
+test("Blossom rolls up into Trees, not into Flowers", () => {
+  assert.deepEqual(subjectsWithParents(["Blossom", "Spring"]), ["Blossom", "Trees", "Spring"]);
+  assert.ok(!subjectsWithParents(["Blossom"]).includes("Flowers"));
+});
+
+test("Garden Flowers rolls up into Flowers, so the wider page keeps everything", () => {
+  assert.deepEqual(subjectsWithParents(["Garden Flowers", "Bees"]), ["Garden Flowers", "Flowers", "Bees"]);
+  assert.deepEqual(subjectsWithParents(["Flowers"]), ["Flowers"]);
+});
+
+test("SUBJECT_SEE_ALSO: Birds links the bird kinds without being their parent", () => {
+  assert.deepEqual(SUBJECT_SEE_ALSO.Birds, ["Birds of Prey", "Seabirds", "Waterbirds", "Waders", "Cormorants", "Birds in Flight"]);
+  assert.deepEqual(SUBJECT_SEE_ALSO.Waterbirds, ["Waders", "Cormorants"]);
+  assert.deepEqual(SUBJECT_SEE_ALSO.Seabirds, ["Cormorants"]);
+  // see-also is not nesting: a Birds of Prey photo must not roll up into Birds
+  assert.deepEqual(subjectsWithParents(["Birds of Prey"]), ["Birds of Prey"]);
+});
+
+test("SUBJECT_SEE_ALSO: Flowers links Garden Flowers and Blossom; Blossom still rolls up into Trees", () => {
+  assert.deepEqual(SUBJECT_SEE_ALSO.Flowers, ["Garden Flowers", "Blossom"]);
+  assert.deepEqual(subjectsWithParents(["Blossom"]), ["Blossom", "Trees"]);
+});

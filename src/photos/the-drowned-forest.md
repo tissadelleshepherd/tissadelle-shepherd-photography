@@ -8,6 +8,12 @@ album: "Lake Naivasha, October 2025"
 image: "the-drowned-forest.jpg"
 alt: "Three bare drowned trees standing in still lake water with their reflections, the Rift Valley escarpment rising behind them under cloud"
 order: 79
+selected: true
 setting: "Natural"
 competitions: [DCC]
+subjects: [Trees, Reflections]
 ---
+
+Lake Naivasha has no river out of it, and it has been rising for a decade; the
+acacias that stood on the shore now stand in the lake, dead. Nobody built
+anything here. The escarpment behind is the wall of the Rift.

@@ -10,4 +10,5 @@ alt: "The Thames looking upstream towards the distant towers of Canary Wharf, wi
 order: 100
 setting: "Built"
 competitions: [DCC]
+subjects: [Skylines, Boats and Ships, Waterfronts and Harbours]
 ---

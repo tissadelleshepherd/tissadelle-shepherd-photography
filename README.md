@@ -19,32 +19,45 @@ order: 1
 ```
 
 The image itself lives under `src/images/photos/`. Eleventy groups photos into
-`/category/<slug>/`, `/location/<slug>/`, `/year/<yyyy>/`, and `/albums/<slug>/`
-archive pages automatically from these fields (see `.eleventy.js`); adding a
-new photo file is all that's needed to have it show up everywhere.
+`/category/<slug>/`, `/location/<slug>/`, `/year/<yyyy>/`, `/albums/<slug>/`
+and `/subjects/<slug>/` archive pages automatically from these fields (see
+`.eleventy.js`); adding a new photo file is all that's needed to have it show
+up everywhere.
+
+An optional `subjects: [Lions, Silhouettes, Sunrise and Sunset]` list tags what is
+in the frame. Unlike every other field it overlaps — a photo carries as many
+as apply — and the words come from a fixed vocabulary in
+`scripts/validate-photos.js`, so a misspelling fails `npm test` instead of
+building a page of one. See CLAUDE.md's "Subjects" for the rules.
 
 ### Categories
 
-Each photo is filed under a single `category`. The set in use:
+Each photo is filed under a single `category`. The set in use, fixed in
+`scripts/validate-photos.js` (a category outside it fails `npm test`):
 
-- **Macro** — close-up detail of a small subject.
-- **Wildlife** — animals and birds.
+- **Wildlife** — free-living animals and birds, with no human element.
+- **Urban Wildlife** — free-living animals in a built or urban setting.
 - **Landscape** — wide natural or outdoor scenes.
 - **Architecture** — buildings and built structures.
 - **Nature** — any natural image that is not clearly Wildlife, Macro, or
   Landscape. Defined as a residual bucket so it never overlaps with those
   three.
+- **Macro** — very close-up detail of a small subject, genuinely enlarged.
+- **Documentary** — scenes with a human element: people, vehicles, captive
+  animals.
+- **Creative** — abstracts, composites, multiple exposures and other creative
+  treatments.
 
-A category with no photos generates no `/category/<slug>/` page, so `Nature`
-only appears once a photo is filed under it.
+A category with no photos generates no `/category/<slug>/` page. See
+CLAUDE.md's "Category rules" for how to choose between them.
 
 ## Development
 
 ```bash
-npm install
+npm ci          # install the committed lockfile exactly (not npm install)
 npm run start   # serve locally with live reload
 npm run build   # build to _site/
-npm test        # Eleventy dry-run build
+npm test        # unit tests, then scripts/validate-photos.js, then an Eleventy dry run
 ```
 
 ## Deployment
@@ -56,9 +69,11 @@ runs `.cpanel.yml`'s single task, which invokes `scripts/cpanel-deploy.sh`.
 That script installs a local Node.js runtime if needed (`scripts/ensure-node.sh`),
 runs `npm ci` and the Eleventy build, then `rsync`s `_site/` to
 `/home/<CPANEL_USER>/public_html/` and verifies `index.html`, `.htaccess`,
-and `.well-known/security.txt` all made it across. It always emails a
-deploy-log to `ADMIN_EMAIL` (success or failure) and keeps the last 20 runs'
-logs in the untracked `deploy-logs/`. That log/notification machinery lives in
+and `.well-known/security.txt` all made it across. It emails a deploy-log to
+`ADMIN_EMAIL` — after every failure, and after every success unless
+`deploy.conf` sets `NOTIFY_ON` to `warnings` or `failure` (since 14 September
+2026; see `sample-deploy.conf`) — and keeps the last 20 runs' logs in the
+untracked `deploy-logs/` whether or not a mail went. That log/notification machinery lives in
 `scripts/deploy-lib.sh`, kept byte-identical with the same file in the
 `star-rangers` repository (like `scripts/mail-lib.sh` and
 `scripts/ensure-node.sh`) — change it in one repo, copy it verbatim to the
@@ -210,10 +225,15 @@ just means the site lags further behind a merge.
   different from "what is deployed?", and only the first tells you the schedule
   itself has stopped. `--status` prints both.
 
-  Setting `AUTOPULL_MAX_GAP_HOURS` in `deploy.conf` mails an alert when the
-  previous run was longer ago than that. It is unset by default and stays that
-  way unless you choose a number: the interval lives in cPanel → Cron Jobs, not
-  in this repo, so the repo has no basis for guessing one. **It can only report
+  `AUTOPULL_MAX_GAP_HOURS` mails an alert when the previous run was longer ago
+  than that. **It defaults to 30 hours** — suited to a daily cron with six
+  hours of slack — since 15 August 2026, when this script's shared twin in
+  `star-rangers` reversed the earlier unset-by-default position: "the interval
+  lives in cPanel, so the repo must not guess" was sound in principle and cost
+  weeks of undetectable silence on one domain in practice. Override it in
+  `deploy.conf` for a different interval, or set `0` for no alerting. (This
+  repo carried the older unset-by-default script until 24 August 2026 — the
+  first drift the shared-scripts CI check caught.) **It can only report
   a gap on the next run that actually happens** — a cron that stops firing
   altogether cannot report its own absence, and no code here can change that.
 - **Deploys only on a real change.** It compares HEAD against the last commit
@@ -236,8 +256,8 @@ just means the site lags further behind a merge.
   to resolve. A modified *tracked* file is the usual cause; `deploy.conf` is
   untracked and gitignored, so it never interferes.
 - **No logging of its own on top of the deploy's.** `scripts/cpanel-deploy.sh`
-  already emails its full log to `ADMIN_EMAIL` and keeps 20 runs in
-  `deploy-logs/`. This script keeps only a small pull/skip/deploy decision log
+  already emails its full log to `ADMIN_EMAIL` (every failure; successes as
+  `NOTIFY_ON` decides) and keeps 20 runs in `deploy-logs/`. This script keeps only a small pull/skip/deploy decision log
   at `$HOME/.cpanel-autopull/<clone>.log`, pruned to the last 500 lines.
 
 Exit codes: `0` nothing to do or deployed, `1` unusable environment, `2`
@@ -308,9 +328,9 @@ PR after this is enabled).
 
 Photo/gallery pages can show a [giscus](https://giscus.app/) discussion thread,
 backed by this repository's own GitHub Discussions. `src/_data/giscus.js`
-already has the repo and repo ID filled in; `GISCUS_CATEGORY_ID` still needs to
-be set (as a repository variable, or in a local `.env`) before comments will
-render — run the generator at https://giscus.app/ against this repo to get it.
+holds the repo, repo ID, category (`Announcements`) and category ID, so the
+thread renders on every page whose front matter sets `comments: true` (photo,
+gallery, album and Selected pages).
 
 ## License
 

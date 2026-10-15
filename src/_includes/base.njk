@@ -6,6 +6,11 @@
   <meta name="description" content="{{ description | default(site.description) }}" />
   {#- What this domain is serving; also at /version.txt. See src/_data/build.js. -#}
   <meta name="site-version" content="{{ build.version }}" />
+  {#- An unlisted photo keeps its URL for anyone who has it, but asks search
+      engines not to index it, since it is in no gallery or sitemap either. -#}
+  {%- if unlisted %}
+  <meta name="robots" content="noindex" />
+  {%- endif %}
   <title>{% if title %}{{ title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
   <link rel="stylesheet" href="/css/main.css?v={{ build.cssVersion }}" />
 
@@ -13,14 +18,51 @@
   <link rel="icon" href="/images/icons/favicon-16.png" sizes="16x16" type="image/png" />
   <link rel="apple-touch-icon" href="/images/icons/favicon-180.png" />
 
+  {#- SELF-canonical: this site declares itself the canonical home of its own
+      URLs. Until August 2026 it emitted no canonical at all, which left every
+      variant of an address - http and https, www and apex - answering 200 with
+      nothing to say which one Google should keep. That is the "Duplicate
+      without user-selected canonical" status in Search Console: not a penalty,
+      but Google picking a winner on your behalf and dropping the rest.
+
+      Built from page.url + site.url, so it matches og:url above exactly and
+      picks up SITE_DOMAIN from deploy.conf with no per-page configuration.
+
+      The force-HTTPS 301 in src/static/.htaccess is the other half of this and
+      the two are deliberately both present: the redirect stops crawlers
+      fetching the http duplicates at all, and the canonical is what answers
+      for every other variant an Apache rule doesn't catch. -#}
+  <link rel="canonical" href="{{ page.url | absoluteUrl(site.url) }}" />
+
+  {#- The homepage's own title is "Home", which is a nav label rather than a
+      name, so its share card carries the site's name instead. -#}
+  {%- set shareTitle = site.title if page.url == "/" else (title | default(site.title)) %}
+  {#- Share image: a photo page shares its own photograph; every other page
+      shares the homepage's first slide, which follows Dermot's `featured: 1`
+      choice. The build fails if a photo page ships without og:image (the
+      transform in .eleventy.js). -#}
+  {%- if image and alt %}
+    {%- set shareImage = image %}
+    {%- set shareImageAlt = alt %}
+  {%- elif collections.homepagePhotos and collections.homepagePhotos.length %}
+    {%- set shareImage = collections.homepagePhotos[0].data.image %}
+    {%- set shareImageAlt = collections.homepagePhotos[0].data.alt %}
+  {%- endif %}
   <meta property="og:site_name" content="{{ site.name }}" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="{{ title | default(site.title) }}" />
+  <meta property="og:title" content="{{ shareTitle }}" />
   <meta property="og:description" content="{{ description | default(site.description) }}" />
   <meta property="og:url" content="{{ page.url | absoluteUrl(site.url) }}" />
+  {%- if shareImage %}
+  <meta property="og:image" content="{{ ('/images/photos/' + shareImage) | absoluteUrl(site.url) }}" />
+  <meta property="og:image:alt" content="{{ shareImageAlt }}" />
+  {%- endif %}
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="{{ title | default(site.title) }}" />
+  <meta name="twitter:title" content="{{ shareTitle }}" />
   <meta name="twitter:description" content="{{ description | default(site.description) }}" />
+  {%- if shareImage %}
+  <meta name="twitter:image" content="{{ ('/images/photos/' + shareImage) | absoluteUrl(site.url) }}" />
+  {%- endif %}
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -34,6 +76,7 @@
       <nav class="site-nav" aria-label="Main navigation">
         <ul class="site-nav__list" role="list">
           <li><a href="/" {% if page.url == "/" %}aria-current="page"{% endif %}>Home</a></li>
+          <li><a href="/selected/" {% if "/selected/" in page.url %}aria-current="page"{% endif %}>Selected</a></li>
           <li><a href="/gallery/" {% if "/gallery/" in page.url %}aria-current="page"{% endif %}>Gallery</a></li>
           <li><a href="/albums/" {% if "/albums/" in page.url %}aria-current="page"{% endif %}>Albums</a></li>
           <li><a href="/about/" {% if "/about/" in page.url %}aria-current="page"{% endif %}>About</a></li>
@@ -72,7 +115,7 @@
       <p>
         <span>{{ site.name }}</span>. Copyright © {{ build.copyrightYears }} Dermot R. Cochran.
         Photographs licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>;
-        site code under <a href="/license/">MIT</a>.
+        site code under <a href="/license/">MIT</a>. <a href="/contact/">Contact</a>.
       </p>
     </div>
   </footer>
