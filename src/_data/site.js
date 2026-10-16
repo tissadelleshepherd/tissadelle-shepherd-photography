@@ -1,5 +1,5 @@
 module.exports = function () {
-  const domain = String(process.env.SITE_DOMAIN || "dermotcochran.com").replace(/\/+$/, "");
+  const domain = String(process.env.SITE_DOMAIN || "fan-archive.invalid").replace(/\/+$/, "");
 
   return {
     // Unofficial fan work: the portfolio presented as an in-story archive from

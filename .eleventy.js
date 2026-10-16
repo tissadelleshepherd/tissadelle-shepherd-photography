@@ -32,7 +32,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/static/.well-known": ".well-known" });
 
   eleventyConfig.addFilter("absoluteUrl", function(path, base) {
-    const siteUrl = base || "https://dermotcochran.com/";
+    const siteUrl = base || "https://fan-archive.invalid/";
     if (!path) return siteUrl;
     if (/^https?:\/\//i.test(path)) return path;
     return new URL(path.replace(/^\/+/, ""), siteUrl).toString();
