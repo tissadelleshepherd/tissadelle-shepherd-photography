@@ -22,10 +22,13 @@ function yearAdded(inputPath) {
 // everywhere the build looks (every collection and the sitemap), without
 // touching the photo's own front matter.
 const FAN_UNLISTED = require("../../lib/fan-unlisted.js");
+// Fan fork: albums carry no dates of our century (lib/fan-album.js).
+const inStoryAlbum = require("../../lib/fan-album.js");
 
 module.exports = {
   eleventyComputed: {
     copyrightYear: (data) => data.year || yearAdded(data.page.inputPath),
+    album: (data) => inStoryAlbum(data.album),
     unlisted: (data) => data.unlisted === true || FAN_UNLISTED.has(data.page.fileSlug) || undefined,
   },
 };
