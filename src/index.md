@@ -1,13 +1,15 @@
 ---
 layout: base.njk
 title: "Home"
-description: "Dermot Cochran Photography — nature, landscape, and wildlife."
+description: "Tissadelle Shepherd Photography: an in-story archive from Fian Ilchruinne. Unofficial fan work; photographs by Dermot R. Cochran."
 templateEngineOverride: njk
 ---
 <section class="home-hero">
-  <h1 class="home-hero__title">Dermot Cochran Photography</h1>
+  <h1 class="home-hero__title">{{ site.name }}</h1>
   <p class="home-hero__subtitle">
-    A collection of nature, landscape, and wildlife photography.
+    Nature, landscape and wildlife, presented as the photo archive of a Star Ranger in
+    <em>Fian Ilchruinne</em>. Unofficial fan work: the photographs are by Dermot R. Cochran.
+    <a href="/about/">About this archive</a>.
   </p>
   <a class="home-hero__cta" href="/selected/">Start with Selected</a>
 </section>

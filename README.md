@@ -2,6 +2,14 @@
 
 Personal photography portfolio, built as a static site with [Eleventy](https://www.11ty.dev/).
 
+**This fork is unofficial fan work.** It presents Dermot R. Cochran's portfolio
+([dermot-cochran-photography](https://github.com/dermot-r-cochran/dermot-cochran-photography))
+as an in-story archive from his novel *Fian Ilchruinne*, kept by the Star Ranger Tissadelle
+Shepherd. She is the photographer in the conceit and never the subject: no page shows or
+names a picture of her. The photographs are Dermot R. Cochran's, unchanged, under
+CC BY-NC-ND 4.0, and are credited to him on every page. Only the framing is new: the site
+name, home page, footer and About page.
+
 ## Content model
 
 Each photo is a Markdown file under `src/photos/`, with front matter:
@@ -95,7 +103,11 @@ copy of the same `mail(1)`/`sendmail` fallback.
    **Deploy HEAD Commit**, or push to `main` and pull from cPanel).
 4. Install the cron job below, so step 3 stops being a manual step.
 
-`src/_data/site.js` defaults `site.url` to `https://dermotcochran.com/`;
+In this fork, `src/_data/site.js` defaults `site.url` to the placeholder
+`https://fan-archive.invalid/` (`.invalid` is a reserved name that can never
+resolve), so an unconfigured build of the fan version never claims
+dermotcochran.com; the original defaults to `https://dermotcochran.com/`.
+`.eleventy.js`'s `absoluteUrl` fallback uses the same placeholder.
 `scripts/cpanel-deploy.sh` overrides it via `SITE_DOMAIN` (from `deploy.conf`'s
 `DOMAIN`) at deploy time, and it can also be set directly as an env var for
 other builds/previews.
