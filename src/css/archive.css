@@ -144,3 +144,34 @@ body {
   .home-slideshow__slide img { padding: 6px; }
   .archive-strap__inner { padding: 0.35rem var(--spacing-md); }
 }
+
+/* --- Out of story ---
+   Anything from our own century (the credit, the licence, the fan-work
+   label, the link to the novel) is set apart and labelled, so the record
+   itself never speaks of it. */
+.out-of-story {
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  border-left: 1px dashed var(--color-mark);
+  padding-left: var(--spacing-md);
+  text-align: left;
+}
+.out-of-story::before {
+  content: "Out of story";
+  display: block;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 0.2rem;
+}
+.page-intro.out-of-story { font-size: 0.9rem; }
+.home-hero__note {
+  max-width: 34rem;
+  margin: 0 auto var(--spacing-lg);
+}
+.site-footer__inner .out-of-story {
+  max-width: 52rem;
+  margin: 0 auto;
+}

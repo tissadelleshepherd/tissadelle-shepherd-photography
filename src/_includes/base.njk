@@ -71,7 +71,7 @@
   <div class="archive-strap">
     <div class="archive-strap__inner">
       <span>Personal record · T. Shepherd · Star Rangers</span>
-      <span>Unofficial fan work · photographs by Dermot R. Cochran · context: <a href="https://fianilchruinne.com/">fianilchruinne.com</a></span>
+      <span>Kept off duty · not a Corps file</span>
     </div>
   </div>
   <header class="site-header" role="banner">
@@ -120,11 +120,15 @@
 
   <footer class="site-footer" role="contentinfo">
     <div class="site-footer__inner">
-      <p>
-        <span>{{ site.name }}</span>: unofficial fan work, an in-story archive from <em>Fian Ilchruinne</em>.
-        Photographs by Dermot R. Cochran, copyright © {{ build.copyrightYears }} Dermot R. Cochran.
-        Photographs licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>;
-        site code under <a href="/license/">MIT</a>. <a href="/contact/">Contact</a>.
+      {# Fan fork: everything from our own century lives here, outside the
+         story, so the record above it speaks only in Tissadelle's voice. #}
+      <p class="out-of-story">
+        <span>{{ site.name }}</span> is unofficial fan work, a fanfiction site set in
+        <a href="https://fianilchruinne.com/"><em>Fian Ilchruinne</em></a>, not endorsed by its author.
+        Photographs by Dermot R. Cochran, copyright © {{ build.copyrightYears }} Dermot R. Cochran,
+        licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>;
+        site code under <a href="/license/">MIT</a>. <a href="/about/">About this archive</a> ·
+        <a href="/contact/">Contact</a>.
       </p>
     </div>
   </footer>
