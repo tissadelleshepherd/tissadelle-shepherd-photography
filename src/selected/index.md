@@ -6,8 +6,7 @@ comments: true
 ---
 <h1 class="page-title">Selected</h1>
 <p class="page-intro">
-  The pick of the site, in one short walk. Any photograph that has placed in a
-  competition is here as well.
+  The pick of the archive, in one short walk.
 </p>
 
 {# A photo is on this page for either of two reasons: Dermot chose it

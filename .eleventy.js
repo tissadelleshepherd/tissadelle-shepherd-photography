@@ -19,6 +19,8 @@ const fs = require("fs");
 const path = require("path");
 const { HtmlBasePlugin } = require("@11ty/eleventy");
 const { jpegSize, readPanelSpec, panelSlices } = require("./lib/panels.js");
+// Fan fork: in-story wording for the photo notes (lib/fan-notes.js).
+const { applyFanNote } = require("./lib/fan-notes.js");
 
 // Every collection is built from the listed photos only. An `unlisted: true`
 // page still renders at its own URL (Eleventy writes every src/photos/*.md),
@@ -58,6 +60,7 @@ module.exports = function(eleventyConfig) {
   });
 
   eleventyConfig.addFilter("slugify", slugify);
+  eleventyConfig.addFilter("fanNote", (html, slug) => applyFanNote(slug, html));
 
   // The see-also subjects for a subject page (SUBJECT_SEE_ALSO in
   // lib/derivations.js); an empty list for every subject that has none.
