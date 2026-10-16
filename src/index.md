@@ -7,9 +7,11 @@ templateEngineOverride: njk
 <section class="home-hero">
   <h1 class="home-hero__title">{{ site.name }}</h1>
   <p class="home-hero__subtitle">
-    Nature, landscape and wildlife, presented as the photo archive of a Star Ranger in
-    <em>Fian Ilchruinne</em>. Unofficial fan work: the photographs are by Dermot R. Cochran.
-    <a href="/about/">About this archive</a>.
+    Frames kept between postings: places, creatures and weather, filed as they were found.
+  </p>
+  <p class="home-hero__note out-of-story">
+    Unofficial fan work set in <a href="https://fianilchruinne.com/"><em>Fian Ilchruinne</em></a>;
+    photographs by Dermot R. Cochran. <a href="/about/">About this archive</a>.
   </p>
   <a class="home-hero__cta" href="/selected/">Start with Selected</a>
 </section>
