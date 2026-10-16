@@ -20,10 +20,15 @@ description: "About this archive: an unofficial fan work from Fian Ilchruinne, w
 <p>
   The record says she reads instruments well and does not claim past her evidence. An archive
   of hers would be like this one: a frame that withholds, and a note that says only what was
-  there. The places, dates and notes on each page are the photographs' own, as their real
-  photographer filed them, and the conceit does not rewrite them; a page's year is marked
-  <em>out of story</em> for that reason. Photographs showing something unmistakably of our own
-  century are kept out of the archive's lists.
+  there. The places and notes on each page are the photographs' own, as their real
+  photographer filed them, except where a note named something of our own century (a date, a
+  competition, a present-day agency): those phrases are reworded, and the dates are left off.
+  Photographs showing something unmistakably of our own century are kept out of the archive's
+  lists.
+</p>
+<p>
+  Six centuries lie between our time and hers, and the archive does not pretend otherwise.
+  The places keep their old names. What else they kept, the frames do not say.
 </p>
 <p>
   The <a href="/plates/">Plates from the record</a> are different: generated illustrations of
