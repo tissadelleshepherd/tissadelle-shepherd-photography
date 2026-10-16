@@ -8,9 +8,10 @@
   <meta name="site-version" content="{{ build.version }}" />
   {#- An unlisted photo keeps its URL for anyone who has it, but asks search
       engines not to index it, since it is in no gallery or sitemap either. -#}
-  {%- if unlisted %}
+  {#- Fan fork: the whole site is noindex, so search engines credit the
+      photographs to the original portfolio alone and never treat this copy as
+      a rival to it. The site stays reachable for anyone with the link. -#}
   <meta name="robots" content="noindex" />
-  {%- endif %}
   <title>{% if title %}{{ title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
   <link rel="stylesheet" href="/css/main.css?v={{ build.cssVersion }}" />
   <link rel="stylesheet" href="/css/archive.css?v={{ build.archiveCssVersion }}" />
@@ -33,7 +34,13 @@
       the two are deliberately both present: the redirect stops crawlers
       fetching the http duplicates at all, and the canonical is what answers
       for every other variant an Apache rule doesn't catch. -#}
+  {#- Fan fork: a photo page names its original on dermotcochran.com as
+      canonical; every other page keeps the self-canonical above. -#}
+  {%- if page.url.startsWith("/photos/") %}
+  <link rel="canonical" href="https://dermotcochran.com{{ page.url }}" />
+  {%- else %}
   <link rel="canonical" href="{{ page.url | absoluteUrl(site.url) }}" />
+  {%- endif %}
 
   {#- The homepage's own title is "Home", which is a nav label rather than a
       name, so its share card carries the site's name instead. -#}
