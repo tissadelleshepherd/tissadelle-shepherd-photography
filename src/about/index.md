@@ -5,8 +5,8 @@ description: "About this archive: an unofficial fan work from Fian Ilchruinne, w
 ---
 <h1 class="page-title">About this archive</h1>
 <p class="page-intro">
-  <strong>Unofficial fan work.</strong> This site is a fan's reframing of Dermot R. Cochran's
-  photography portfolio as an in-story archive from his novel
+  <strong>Unofficial fan work.</strong> This is a fanfiction site: a fan's reframing of
+  Dermot R. Cochran's photography portfolio as an in-story archive from his novel
   <em><a href="https://fianilchruinne.com">Fian Ilchruinne</a></em>. It is not by the author of
   the novel, not endorsed by him, and asserts nothing about the story.
 </p>
@@ -21,7 +21,14 @@ description: "About this archive: an unofficial fan work from Fian Ilchruinne, w
   The record says she reads instruments well and does not claim past her evidence. An archive
   of hers would be like this one: a frame that withholds, and a note that says only what was
   there. The places, dates and notes on each page are the photographs' own, as their real
-  photographer filed them, and the conceit does not rewrite them.
+  photographer filed them, and the conceit does not rewrite them; a page's year is marked
+  <em>out of story</em> for that reason. Photographs showing something unmistakably of our own
+  century are kept out of the archive's lists.
+</p>
+<p>
+  The <a href="/plates/">Plates from the record</a> are different: generated illustrations of
+  the novel's worlds, reproduced unchanged from fianilchruinne.com and labelled as such. They
+  are not photographs, not hers, and none shows a person.
 </p>
 
 <h2>Out of the story</h2>

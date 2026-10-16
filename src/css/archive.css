@@ -130,6 +130,8 @@ body {
 
 .archive-list a { font-size: 0.95rem; letter-spacing: 0.04em; }
 
+.plates-grid + .photo-license { margin-top: var(--spacing-lg); }
+
 .home-hero__cta {
   font-family: var(--font-ui);
   text-transform: uppercase;
