@@ -2,6 +2,14 @@
 
 Personal photography portfolio, built as a static site with [Eleventy](https://www.11ty.dev/).
 
+**This fork is unofficial fan work.** It presents Dermot R. Cochran's portfolio
+([dermot-cochran-photography](https://github.com/dermot-r-cochran/dermot-cochran-photography))
+as an in-story archive from his novel *Fian Ilchruinne*, kept by the Star Ranger Tissadelle
+Shepherd. She is the photographer in the conceit and never the subject: no page shows or
+names a picture of her. The photographs are Dermot R. Cochran's, unchanged, under
+CC BY-NC-ND 4.0, and are credited to him on every page. Only the framing is new: the site
+name, home page, footer and About page.
+
 ## Content model
 
 Each photo is a Markdown file under `src/photos/`, with front matter:

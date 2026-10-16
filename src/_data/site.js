@@ -2,9 +2,12 @@ module.exports = function () {
   const domain = String(process.env.SITE_DOMAIN || "dermotcochran.com").replace(/\/+$/, "");
 
   return {
-    name: "Dermot Cochran Photography",
-    title: "Dermot Cochran Photography",
-    description: "Photography portfolio of Dermot R. Cochran — nature, landscape, and wildlife.",
+    // Unofficial fan work: the portfolio presented as an in-story archive from
+    // Fian Ilchruinne. The photographs stay credited to Dermot R. Cochran here
+    // (author), in the footer and on the About page, as CC BY requires.
+    name: "Tissadelle Shepherd Photography",
+    title: "Tissadelle Shepherd Photography",
+    description: "An in-story photo archive from Fian Ilchruinne, presented as Tissadelle Shepherd's. Unofficial fan work; photographs by Dermot R. Cochran.",
     url: `https://${domain}/`,
     author: "Dermot R. Cochran",
     language: "en"
