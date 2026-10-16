@@ -23,6 +23,7 @@ eleventyComputed:
     {% endfor %}
   </div>
   {% endif %}
+  <p class="record-line">Record TS/{{ page.fileSlug }} · filed by T. Shepherd</p>
   <h1 class="page-title">{{ title }}</h1>
 
   {# Optional note. Renders only when the .md file has body text, so photos
@@ -82,7 +83,7 @@ eleventyComputed:
     </div>
     {% endif %}
     <div class="photo-meta__row">
-      <dt>Year</dt>
+      <dt>Year taken (out of story)</dt>
       <dd><a href="/year/{{ year }}/">{{ year }}</a></dd>
     </div>
     {% if album %}

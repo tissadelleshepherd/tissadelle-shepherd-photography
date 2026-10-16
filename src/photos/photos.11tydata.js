@@ -18,8 +18,14 @@ function yearAdded(inputPath) {
   }
 }
 
+// Fan fork: a photo named in lib/fan-unlisted.js reads as `unlisted: true`
+// everywhere the build looks (every collection and the sitemap), without
+// touching the photo's own front matter.
+const FAN_UNLISTED = require("../../lib/fan-unlisted.js");
+
 module.exports = {
   eleventyComputed: {
     copyrightYear: (data) => data.year || yearAdded(data.page.inputPath),
+    unlisted: (data) => data.unlisted === true || FAN_UNLISTED.has(data.page.fileSlug) || undefined,
   },
 };

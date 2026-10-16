@@ -13,6 +13,7 @@
   {%- endif %}
   <title>{% if title %}{{ title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
   <link rel="stylesheet" href="/css/main.css?v={{ build.cssVersion }}" />
+  <link rel="stylesheet" href="/css/archive.css?v={{ build.archiveCssVersion }}" />
 
   <link rel="icon" href="/images/icons/favicon-32.png" sizes="32x32" type="image/png" />
   <link rel="icon" href="/images/icons/favicon-16.png" sizes="16x16" type="image/png" />
@@ -67,6 +68,12 @@
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
+  <div class="archive-strap">
+    <div class="archive-strap__inner">
+      <span>Personal record · T. Shepherd · Star Rangers</span>
+      <span>Unofficial fan work · photographs by Dermot R. Cochran · context: <a href="https://fianilchruinne.com/">fianilchruinne.com</a></span>
+    </div>
+  </div>
   <header class="site-header" role="banner">
     <div class="site-header__inner">
       <a class="site-logo" href="/">
@@ -79,6 +86,7 @@
           <li><a href="/selected/" {% if "/selected/" in page.url %}aria-current="page"{% endif %}>Selected</a></li>
           <li><a href="/gallery/" {% if "/gallery/" in page.url %}aria-current="page"{% endif %}>Gallery</a></li>
           <li><a href="/albums/" {% if "/albums/" in page.url %}aria-current="page"{% endif %}>Albums</a></li>
+          <li><a href="/plates/" {% if "/plates/" in page.url %}aria-current="page"{% endif %}>Plates</a></li>
           <li><a href="/about/" {% if "/about/" in page.url %}aria-current="page"{% endif %}>About</a></li>
         </ul>
       </nav>
