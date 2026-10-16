@@ -4,7 +4,7 @@ title: "License"
 description: "Licensing for the photographs and the site code."
 ---
 <h1 class="page-title">License</h1>
-<p class="page-intro">
+<p class="page-intro out-of-story">
   Copyright &copy; {{ build.copyrightYears }} Dermot R. Cochran. Photographs and site code are
   licensed separately.
 </p>
