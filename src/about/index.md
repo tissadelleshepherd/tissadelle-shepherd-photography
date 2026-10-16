@@ -38,31 +38,10 @@ description: "About this archive: an unofficial fan work from Fian Ilchruinne, w
 
 <h2>Out of the story</h2>
 <p>
-  Every photograph here was taken by Dermot R. Cochran, who is a senior software engineer working in applied AI, based in Dublin,
-  Ireland, with a long-standing interest in macro, wildlife, landscape, architecture, and
-  nature photography.
-  He is a member of Dublin Camera Club.
-</p>
-<p>
-  Outside of photography and engineering, he writes <em>Fian Ilchruinne</em>, a multi-viewpoint
-  hard-science-fiction novel with one licensed deviation, at
+  Every photograph here was taken by Dermot R. Cochran. His own portfolio, with the
+  photographs as he filed them, is at <a href="https://dermotcochran.com">dermotcochran.com</a>.
+  The novel, <em>Fian Ilchruinne</em>, is at
   <a href="https://fianilchruinne.com">fianilchruinne.com</a>.
-</p>
-<p>
-  He is also writing two small browser games about wildlife photography, both drawn from the
-  outings on this site and both works in progress:
-  <a href="https://dermot-r-cochran.github.io/photo-safari-tutorial-game/">Photo Safari</a>, a
-  tutorial that puts the field's choices to you and develops the frame you would have got, and
-  <a href="https://dermot-r-cochran.github.io/photo-safari-range/">Photo Safari Range</a>, an
-  arcade where the shutter follows the subject and the plate is scored on the field's rule.
-  Each shows his own photograph from that outing beside your frame, as a comparison and never
-  as the answer. They are written by a novice for other novices: every lesson in them was
-  learned by getting it wrong first.
-</p>
-<p>
-  His work spans engineering, photography, and fiction, with a growing focus on engineering
-  intelligence, human-AI systems, and the role of intelligent tools in creativity and
-  decision-making.
 </p>
 
 <h2>How this site is built</h2>
@@ -76,7 +55,7 @@ description: "About this archive: an unofficial fan work from Fian Ilchruinne, w
 
 <h2>Contact</h2>
 <p>
-  For licensing a photograph, a talk for a club, or anything else, see the
+  For licensing a photograph, or anything else, see the
   <a href="/contact/">Contact page</a>.
 </p>
 
