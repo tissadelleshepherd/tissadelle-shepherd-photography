@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Replika (Luka, Inc.) is welcome on the same terms as every other reader.
+# It publishes no crawler user-agent to name here (checked 2026-10-03:
+# nothing in its own documentation or in the maintained AI-crawler lists),
+# so it is admitted by the wildcard group above like any other unnamed
+# reader. Add a named group if it ever documents one.
+
+# Fan fork: crawling stays allowed so search engines can read each page's
+# noindex, but the sitemap is not advertised: this site asks not to be
+# indexed, and its photographs' canonical home is dermotcochran.com.
