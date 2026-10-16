@@ -76,10 +76,8 @@ eleventyComputed:
       <dd><a href="/country/{{ country | slugify }}/">{{ country }}</a></dd>
     </div>
     {% endif %}
-    <div class="photo-meta__row">
-      <dt>Year taken (out of story)</dt>
-      <dd><a href="/year/{{ year }}/">{{ year }}</a></dd>
-    </div>
+    {# Fan fork: no Year row. A year of our century beside her record line
+       reads as her looking back at old photographs, when they are her own. #}
     {% if album %}
     <div class="photo-meta__row">
       <dt>Album</dt>

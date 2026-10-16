@@ -32,6 +32,9 @@ module.exports = function(eleventyConfig) {
   // root-relative URL in the output is rewritten with --pathprefix. Without
   // the flag (local builds, `npm test`) the prefix is "/" and nothing changes.
   eleventyConfig.addPlugin(HtmlBasePlugin);
+  // Fan fork: no Years section. The photos are her own frames, and a list of
+  // our century's years would make them read as old ones she collected.
+  eleventyConfig.ignores.add("src/year/**");
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
   eleventyConfig.addPassthroughCopy({ "src/js": "js" });
   eleventyConfig.addPassthroughCopy({ "src/images": "images" });
