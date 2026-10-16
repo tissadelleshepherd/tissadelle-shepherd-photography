@@ -17,6 +17,7 @@ const {
 } = require("./lib/derivations.js");
 const fs = require("fs");
 const path = require("path");
+const { HtmlBasePlugin } = require("@11ty/eleventy");
 const { jpegSize, readPanelSpec, panelSlices } = require("./lib/panels.js");
 
 // Every collection is built from the listed photos only. An `unlisted: true`
@@ -25,6 +26,10 @@ const { jpegSize, readPanelSpec, panelSlices } = require("./lib/panels.js");
 const listed = (collectionApi) => listedPhotos(collectionApi.getFilteredByGlob("src/photos/*.md"));
 
 module.exports = function(eleventyConfig) {
+  // Fan fork: the GitHub Pages build is served under a sub-path, so every
+  // root-relative URL in the output is rewritten with --pathprefix. Without
+  // the flag (local builds, `npm test`) the prefix is "/" and nothing changes.
+  eleventyConfig.addPlugin(HtmlBasePlugin);
   eleventyConfig.addPassthroughCopy({ "src/css": "css" });
   eleventyConfig.addPassthroughCopy({ "src/js": "js" });
   eleventyConfig.addPassthroughCopy({ "src/images": "images" });

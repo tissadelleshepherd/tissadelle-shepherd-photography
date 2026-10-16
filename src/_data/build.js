@@ -26,6 +26,7 @@ module.exports = function () {
     year: currentYear,
     copyrightYears: currentYear > startYear ? `${startYear}–${currentYear}` : `${startYear}`,
     cssVersion: assetVersion("css/main.css"),
+    archiveCssVersion: assetVersion("css/archive.css"),
     slideshowVersion: assetVersion("js/slideshow.js"),
     // What this build is shipping, stamped into <meta name="site-version">
     // and /version.txt so the live domain can be checked from outside with

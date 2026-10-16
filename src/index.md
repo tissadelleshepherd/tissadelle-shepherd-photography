@@ -26,7 +26,7 @@ templateEngineOverride: njk
         {% if loop.first %}
         <img src="/images/photos/{{ photo.data.image }}" alt="{{ photo.data.alt }}" loading="eager" fetchpriority="high" />
         {% else %}
-        <img data-src="/images/photos/{{ photo.data.image }}" alt="{{ photo.data.alt }}" />
+        <img data-src="{{ ('/images/photos/' + photo.data.image) | htmlBaseUrl }}" alt="{{ photo.data.alt }}" />
         {% endif %}
       </a>
       <figcaption class="home-slideshow__caption">{{ photo.data.title }}</figcaption>
