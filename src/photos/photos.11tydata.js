@@ -29,6 +29,9 @@ module.exports = {
   eleventyComputed: {
     copyrightYear: (data) => data.year || yearAdded(data.page.inputPath),
     album: (data) => inStoryAlbum(data.album),
+    // Fan fork: the generated meta description leaves out the year taken.
+    description: (data) =>
+      data.description || `${data.title} — ${data.category} photograph, ${data.location}.`,
     unlisted: (data) => data.unlisted === true || FAN_UNLISTED.has(data.page.fileSlug) || undefined,
   },
 };

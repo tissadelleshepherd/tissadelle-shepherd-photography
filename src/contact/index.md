@@ -5,7 +5,7 @@ description: "How to reach Dermot R. Cochran about a photograph, a licence, or a
 comments: false
 ---
 <h1 class="page-title">Contact</h1>
-<p class="page-intro">
+<p class="page-intro out-of-story">
   For anything about a photograph on this site, a licence to use one, or a talk for a camera
   club or a group, write to
   <a href="mailto:contact@dermotcochran.com">contact@dermotcochran.com</a>.
