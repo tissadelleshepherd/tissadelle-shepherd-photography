@@ -781,11 +781,10 @@ it.
   there, editorial rules here, taste in `STYLE.md`.
 - Build locally with `npm run build`; check the new pages exist under `_site/`
   and that every `images/photos/*.jpg` reference resolves.
-- `gh` (GitHub CLI 2.98) is installed and authenticated as of 2 September
-  2026: `gh pr create --head <branch> --base main --body-file <file>` opens a
-  PR (`--head` is needed explicitly here), `gh pr checks <n> --watch` follows
-  CI, `gh pr merge <n> --merge --delete-branch` lands it. The REST-API route
-  with the token from `git credential fill` still works as a fallback. CI runs
+- On the desktop, `gh pr create --head <branch> --base main --body-file <file>`
+  opens a PR (`--head` is needed explicitly here), `gh pr checks <n> --watch`
+  follows CI, and `gh pr merge <n> --merge --delete-branch` lands it. How the
+  desktop signs in to GitHub is a connection detail and is kept there. CI runs
   `npm test` (validator + Eleventy dry run), ShellCheck over the deploy
   scripts, a shared-scripts check, and a PR preview deploy; wait for all of
   them before merging.
@@ -800,14 +799,14 @@ it.
   piece of work.
 
 Dermot's DCC submission workflow folders (`Ready for Submission`,
-`Submitted Images`) are in `...\OneDrive\Pictures\DCC\`; he submits via
-Pixoroo.
+`Submitted Images`) are on the desktop, in a cloud-synced folder whose path
+is kept there; he submits via Pixoroo.
 
 ## Source material
 
 Raw camera dumps (JPG + NEF) live in `F:\<NNNXXXXX>\` folders (e.g.
-`F:\103KENYA`). Staging folder for one-off photos to process:
-`C:\Users\Harvey Norman\Dermot Cochran\OneDrive\Pictures\CLAUDE\`.
+`F:\103KENYA`). One-off photos to process are staged in a `CLAUDE` folder
+beside the DCC ones, whose path is kept on the desktop.
 Get `year` from EXIF DateTimeOriginal. When choosing from a burst, compare
 frames visually — Laplacian sharpness scores track grass texture, not focus.
 
